@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Articles — Auwion</title>
+<title>Admin — Auwion</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="256x256" href="favicon-256.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -448,110 +448,97 @@
 
 <main>
   <section style="padding-top:60px;">
-    <div class="wrap">
-      <div class="section-head reveal in">
-        <div class="eyebrow">From the ledger</div>
-        <h1 class="section-title" style="font-size:clamp(30px,4vw,44px);">Articles</h1>
-        <p class="section-sub">Guides, tips, and updates on Business Central, Zoho Books, Odoo, and web development.</p>
+    <div class="wrap" style="max-width:760px;">
+
+      <div id="loginGate">
+        <div class="section-head reveal in">
+          <div class="eyebrow">Admin</div>
+          <h1 class="section-title" style="font-size:clamp(28px,4vw,38px);">Sign in</h1>
+          <p class="section-sub">Log in with your Auwion admin account to manage articles.</p>
+        </div>
+        <form id="adminLoginForm" style="display:flex;flex-direction:column;gap:14px;max-width:420px;">
+          <input type="email" id="adminEmail" placeholder="Email" required
+            style="padding:13px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--font-body);font-size:15px;">
+          <input type="password" id="adminPassword" placeholder="Password" required
+            style="padding:13px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--font-body);font-size:15px;">
+          <button type="submit" class="btn btn-primary" style="justify-content:center;">Log in</button>
+          <p id="loginError" style="color:#E23FA0;font-size:14px;display:none;"></p>
+        </form>
       </div>
-      <div class="filter-row reveal in" id="articleFilters">
-        <a href="#" class="filter-pill active" data-filter="All">All</a>
-        <a href="#" class="filter-pill" data-filter="Business Central">Business Central</a>
-        <a href="#" class="filter-pill" data-filter="Zoho Books">Zoho Books</a>
-        <a href="#" class="filter-pill" data-filter="Odoo">Odoo</a>
-        <a href="#" class="filter-pill" data-filter="Web dev">Web dev</a>
+
+      <div id="notAdmin" style="display:none;">
+        <h1 style="font-family:var(--font-display);">Not authorized</h1>
+        <p style="color:var(--text-soft);">This account doesn't have admin access. Contact whoever set up the site if you think this is a mistake.</p>
+        <button class="btn btn-ghost" id="logoutBtn2">Log out</button>
       </div>
-      <div class="article-grid reveal in" id="articleGrid">
-        <a href="article-bc-migration.html" class="article-card">
-          <div class="article-thumb" data-tag="Business Central" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-BusinessCentral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
 
-<rect x="20" y="40" width="50" height="50" rx="8" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4"/>
-<rect x="130" y="50" width="50" height="50" rx="8" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4"/>
-<path d="M74 62h52M108 52l18 12-18 12" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <div id="adminPanel" style="display:none;">
+        <div class="section-head reveal in" style="margin-bottom:24px;">
+          <div class="eyebrow">Admin</div>
+          <h1 class="section-title" style="font-size:clamp(28px,4vw,38px);">Manage articles</h1>
+          <p class="section-sub">Write, publish, edit, or remove articles. Changes go live immediately.</p>
+        </div>
 
-</svg></div>
-          <div class="article-body">
-            <p class="article-title">What actually changes during a BC migration</p>
-            <p class="article-meta">5 MIN READ</p>
-          </div>
-        </a>
-        <a href="article-odoo-modules.html" class="article-card">
-          <div class="article-thumb" data-tag="Odoo" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-Odoo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
+        <button class="btn btn-ghost" id="logoutBtn" style="margin-bottom:36px;">Log out</button>
 
-<rect x="34" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="82" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="130" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="58" y="78" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="106" y="78" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
+        <div style="border:1px solid var(--border);border-radius:14px;padding:26px;background:var(--card);margin-bottom:44px;">
+          <h3 id="formHeading" style="font-family:var(--font-display);margin:0 0 18px;">New article</h3>
+          <form id="articleForm" style="display:flex;flex-direction:column;gap:14px;">
+            <input type="hidden" id="articleId">
+            <label style="font-size:13px;color:var(--text-dim);">Title
+              <input type="text" id="fieldTitle" required
+                style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-body);font-size:15px;">
+            </label>
+            <label style="font-size:13px;color:var(--text-dim);">Web address (auto-filled, only edit if you need to)
+              <input type="text" id="fieldSlug"
+                style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-mono);font-size:13px;">
+            </label>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <label style="font-size:13px;color:var(--text-dim);flex:1;min-width:180px;">Category
+                <select id="fieldTag" style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-body);font-size:15px;">
+                  <option>Business Central</option>
+                  <option>Zoho Books</option>
+                  <option>Odoo</option>
+                  <option selected>Web dev</option>
+                  <option>Book keeping</option>
+                </select>
+              </label>
+              <label style="font-size:13px;color:var(--text-dim);flex:1;min-width:140px;">Read time
+                <input type="text" id="fieldReadTime" value="4 MIN READ"
+                  style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-body);font-size:15px;">
+              </label>
+            </div>
+            <label style="font-size:13px;color:var(--text-dim);">Short summary (shown on the Articles page)
+              <textarea id="fieldExcerpt" rows="2"
+                style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-body);font-size:15px;resize:vertical;"></textarea>
+            </label>
+            <label style="font-size:13px;color:var(--text-dim);">
+              Content — leave a blank line between paragraphs. Start a line with <code>## </code> to make it a subheading.
+              <textarea id="fieldBody" rows="12" required
+                style="width:100%;margin-top:6px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-2);color:var(--text);font-family:var(--font-body);font-size:15px;resize:vertical;"></textarea>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-soft);">
+              <input type="checkbox" id="fieldPublished" checked style="width:16px;height:16px;">
+              Published (visible on the site)
+            </label>
+            <div style="display:flex;gap:12px;">
+              <button type="submit" class="btn btn-primary">Save article</button>
+              <button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none;">Cancel edit</button>
+            </div>
+            <p id="saveStatus" style="font-size:14px;display:none;"></p>
+          </form>
+        </div>
 
-</svg></div>
-          <div class="article-body">
-            <p class="article-title">Choosing the right Odoo modules to start with</p>
-            <p class="article-meta">4 MIN READ</p>
-          </div>
-        </a>
-        <a href="article-zoho-reconciliation.html" class="article-card">
-          <div class="article-thumb" data-tag="Zoho Books" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-ZohoBooks" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
-
-<rect x="55" y="20" width="90" height="100" rx="8" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="4"/>
-<path d="M72 44h56M72 60h56M72 76h34" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="4" stroke-linecap="round"/>
-<path d="M74 96l10 10 20-22" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-
-</svg></div>
-          <div class="article-body">
-            <p class="article-title">Zoho Books reconciliation, monthly checklist</p>
-            <p class="article-meta">6 MIN READ</p>
-          </div>
-        </a>
+        <h3 style="font-family:var(--font-display);margin:0 0 16px;">All articles</h3>
+        <div id="articleList" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
+
     </div>
   </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-client.js"></script>
-
 <footer>
   <div class="wrap">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="wordmark">AUW<span>I</span>ON</a>
-        <p>Business Central, Zoho Books, and Odoo — implemented, supported, and extended by Auwion.</p>
-        <div class="footer-contact">
-          <a href="tel:+94711222528">+94 71 122 2528</a>
-          <a href="mailto:hasith@auwion.com">hasith@auwion.com</a>
-          <span>1142/2, Wasawalatta Lane, Pannipitiya, Sri Lanka</span>
-          <a href="https://www.linkedin.com/company/auwion" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Services</h4>
-        <ul>
-          <li><a href="business-central.html">Business Central</a></li>
-          <li><a href="zoho-books.html">Zoho Books</a></li>
-          <li><a href="odoo.html">Odoo</a></li>
-          <li><a href="web-development.html">Web development</a></li>
-          <li><a href="bookkeeping.html">Book keeping</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="about.html">About</a></li>
-          <li><a href="about.html#contact">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="articles.html">Articles</a></li>
-          <li><a href="login.html">Client login</a></li>
-        </ul>
-      </div>
-    </div>
     <div class="footer-bottom">
       <span>Books closed. © 2026 Auwion.</span>
       <span><a href="privacy.html" style="color:inherit;text-decoration:none;">Privacy</a> · <a href="terms.html" style="color:inherit;text-decoration:none;">Terms</a></span>
@@ -560,6 +547,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
 <script>
   var toggle = document.getElementById('menuToggle');
   var mobileNav = document.getElementById('mobile-nav');
@@ -570,62 +559,164 @@
       toggle.textContent = isOpen ? 'CLOSE' : 'MENU';
     });
   }
-  var reveals = document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
-      });
-    }, {threshold:0.1});
-    reveals.forEach(function(el){ io.observe(el); });
-  } else {
-    reveals.forEach(function(el){ el.classList.add('in'); });
+
+  function slugify(text){
+    return text.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
   }
 
-  // Article filtering (re-runs after dynamic articles are appended too)
-  function wireArticleFilters(){
-    var filterPills = document.querySelectorAll('#articleFilters .filter-pill');
-    var articleCards = document.querySelectorAll('#articleGrid .article-card');
-    filterPills.forEach(function(pill){
-      pill.onclick = function(e){
-        e.preventDefault();
-        filterPills.forEach(function(p){ p.classList.remove('active'); });
-        pill.classList.add('active');
-        var filter = pill.getAttribute('data-filter');
-        articleCards.forEach(function(card){
-          var tag = card.querySelector('.article-thumb').getAttribute('data-tag');
-          card.style.display = (filter === 'All' || tag === filter) ? '' : 'none';
-        });
-      };
+  var loginGate = document.getElementById('loginGate');
+  var notAdminEl = document.getElementById('notAdmin');
+  var adminPanel = document.getElementById('adminPanel');
+
+  async function showCorrectView(){
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const user = sessionData?.session?.user;
+    if(!user){
+      loginGate.style.display = 'block';
+      notAdminEl.style.display = 'none';
+      adminPanel.style.display = 'none';
+      return;
+    }
+    const isAdmin = await auwionIsAdmin();
+    if(isAdmin){
+      loginGate.style.display = 'none';
+      notAdminEl.style.display = 'none';
+      adminPanel.style.display = 'block';
+      loadArticleList();
+    } else {
+      loginGate.style.display = 'none';
+      notAdminEl.style.display = 'block';
+      adminPanel.style.display = 'none';
+    }
+  }
+
+  document.getElementById('adminLoginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    var email = document.getElementById('adminEmail').value;
+    var password = document.getElementById('adminPassword').value;
+    var result = await auwionLogIn({ email: email, password: password });
+    if(!result.ok){
+      errEl.textContent = result.message;
+      errEl.style.display = 'block';
+      return;
+    }
+    showCorrectView();
+  });
+
+  function attachLogout(id){
+    var btn = document.getElementById(id);
+    if(btn) btn.addEventListener('click', async function(){
+      await auwionLogOut();
+      showCorrectView();
     });
   }
-  wireArticleFilters();
+  attachLogout('logoutBtn');
+  attachLogout('logoutBtn2');
 
-  // Load articles published from the admin panel and add them to the grid
-  (async function loadDynamicArticles(){
-    if(typeof auwionGetPublishedArticles !== 'function') return;
-    var result = await auwionGetPublishedArticles();
-    if(!result.ok || !result.articles || result.articles.length === 0) return;
+  // Auto-fill slug from title, unless the user has typed their own slug
+  var slugManuallyEdited = false;
+  document.getElementById('fieldSlug').addEventListener('input', function(){ slugManuallyEdited = true; });
+  document.getElementById('fieldTitle').addEventListener('input', function(){
+    if(!slugManuallyEdited){
+      document.getElementById('fieldSlug').value = slugify(this.value);
+    }
+  });
 
-    var grid = document.getElementById('articleGrid');
+  function resetForm(){
+    document.getElementById('articleForm').reset();
+    document.getElementById('articleId').value = '';
+    document.getElementById('formHeading').textContent = 'New article';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('fieldReadTime').value = '4 MIN READ';
+    document.getElementById('fieldPublished').checked = true;
+    slugManuallyEdited = false;
+  }
+  document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+  document.getElementById('articleForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var statusEl = document.getElementById('saveStatus');
+    var article = {
+      id: document.getElementById('articleId').value || null,
+      slug: document.getElementById('fieldSlug').value || slugify(document.getElementById('fieldTitle').value),
+      title: document.getElementById('fieldTitle').value,
+      excerpt: document.getElementById('fieldExcerpt').value,
+      tag: document.getElementById('fieldTag').value,
+      read_time: document.getElementById('fieldReadTime').value,
+      body: document.getElementById('fieldBody').value,
+      published: document.getElementById('fieldPublished').checked,
+    };
+    var result = await auwionAdminSaveArticle(article);
+    statusEl.style.display = 'block';
+    if(result.ok){
+      statusEl.style.color = 'var(--teal-soft)';
+      statusEl.textContent = 'Saved.';
+      resetForm();
+      loadArticleList();
+    } else {
+      statusEl.style.color = '#E23FA0';
+      statusEl.textContent = result.message;
+    }
+  });
+
+  function fillFormForEdit(a){
+    document.getElementById('articleId').value = a.id;
+    document.getElementById('fieldTitle').value = a.title;
+    document.getElementById('fieldSlug').value = a.slug;
+    document.getElementById('fieldTag').value = a.tag || 'Web dev';
+    document.getElementById('fieldReadTime').value = a.read_time || '4 MIN READ';
+    document.getElementById('fieldExcerpt').value = a.excerpt || '';
+    document.getElementById('fieldBody').value = a.body || '';
+    document.getElementById('fieldPublished').checked = !!a.published;
+    document.getElementById('formHeading').textContent = 'Edit article';
+    document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+    slugManuallyEdited = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function loadArticleList(){
+    var listEl = document.getElementById('articleList');
+    listEl.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">Loading…</p>';
+    var result = await auwionAdminListArticles();
+    if(!result.ok){
+      listEl.innerHTML = '<p style="color:#E23FA0;">' + result.message + '</p>';
+      return;
+    }
+    if(result.articles.length === 0){
+      listEl.innerHTML = '<p style="color:var(--text-dim);">No articles yet. Add your first one above.</p>';
+      return;
+    }
+    listEl.innerHTML = '';
     result.articles.forEach(function(a){
-      var card = document.createElement('a');
-      card.href = 'article-view.html?slug=' + encodeURIComponent(a.slug);
-      card.className = 'article-card';
-      card.innerHTML =
-        '<div class="article-thumb" data-tag="' + a.tag + '" style="display:flex;align-items:center;justify-content:center;">' +
-        '<svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="34" y="34" width="132" height="72" rx="10" stroke="#3B82F6" stroke-width="4"/>' +
-        '<path d="M56 62h88M56 82h60" stroke="#0FA898" stroke-width="4" stroke-linecap="round"/>' +
-        '</svg></div>' +
-        '<div class="article-body">' +
-        '<p class="article-title">' + a.title + '</p>' +
-        '<p class="article-meta">' + (a.read_time || '4 MIN READ') + '</p>' +
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--border-soft);border-radius:10px;padding:14px 16px;flex-wrap:wrap;';
+      var statusBadge = a.published
+        ? '<span style="font-family:var(--font-mono);font-size:10px;color:var(--teal-soft);border:1px solid var(--border);padding:2px 8px;border-radius:100px;">PUBLISHED</span>'
+        : '<span style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);border:1px solid var(--border);padding:2px 8px;border-radius:100px;">DRAFT</span>';
+      row.innerHTML =
+        '<div><div style="font-weight:600;">' + a.title + '</div>' +
+        '<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">' + a.tag + ' · ' + statusBadge + '</div></div>' +
+        '<div style="display:flex;gap:8px;">' +
+        '<a href="article-view.html?slug=' + encodeURIComponent(a.slug) + '" target="_blank" class="btn btn-ghost" style="padding:8px 14px;font-size:13px;">View</a>' +
+        '<button class="btn btn-ghost" data-edit style="padding:8px 14px;font-size:13px;">Edit</button>' +
+        '<button class="btn btn-ghost" data-delete style="padding:8px 14px;font-size:13px;color:#E23FA0;">Delete</button>' +
         '</div>';
-      grid.appendChild(card);
+      row.querySelector('[data-edit]').addEventListener('click', function(){ fillFormForEdit(a); });
+      row.querySelector('[data-delete]').addEventListener('click', async function(){
+        if(!confirm('Delete "' + a.title + '"? This can\'t be undone.')) return;
+        var delResult = await auwionAdminDeleteArticle(a.id);
+        if(delResult.ok){ loadArticleList(); } else { alert(delResult.message); }
+      });
+      listEl.appendChild(row);
     });
-    wireArticleFilters();
-  })();
+  }
+
+  showCorrectView();
 </script>
 </body>
 </html>

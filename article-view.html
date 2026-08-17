@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Articles — Auwion</title>
+<title>Article — Auwion</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="256x256" href="favicon-256.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -448,71 +448,33 @@
 
 <main>
   <section style="padding-top:60px;">
-    <div class="wrap">
-      <div class="section-head reveal in">
-        <div class="eyebrow">From the ledger</div>
-        <h1 class="section-title" style="font-size:clamp(30px,4vw,44px);">Articles</h1>
-        <p class="section-sub">Guides, tips, and updates on Business Central, Zoho Books, Odoo, and web development.</p>
+    <div class="wrap article-full" id="articleContent">
+      <div class="breadcrumb"><a href="index.html">Home</a> / <a href="articles.html">Articles</a> / <span id="crumbTitle">Article</span></div>
+      <div id="articleLoading" style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:40px 0;">Loading article…</div>
+      <div id="articleNotFound" style="display:none;padding:40px 0;">
+        <h1 style="font-family:var(--font-display);">Article not found</h1>
+        <p style="color:var(--text-soft);">This article may have been unpublished or the link is incorrect.</p>
+        <a href="articles.html" class="btn btn-ghost">← Back to Articles</a>
       </div>
-      <div class="filter-row reveal in" id="articleFilters">
-        <a href="#" class="filter-pill active" data-filter="All">All</a>
-        <a href="#" class="filter-pill" data-filter="Business Central">Business Central</a>
-        <a href="#" class="filter-pill" data-filter="Zoho Books">Zoho Books</a>
-        <a href="#" class="filter-pill" data-filter="Odoo">Odoo</a>
-        <a href="#" class="filter-pill" data-filter="Web dev">Web dev</a>
-      </div>
-      <div class="article-grid reveal in" id="articleGrid">
-        <a href="article-bc-migration.html" class="article-card">
-          <div class="article-thumb" data-tag="Business Central" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-BusinessCentral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
-
-<rect x="20" y="40" width="50" height="50" rx="8" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4"/>
-<rect x="130" y="50" width="50" height="50" rx="8" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4"/>
-<path d="M74 62h52M108 52l18 12-18 12" stroke="url(#garticleshtml-thumb-BusinessCentral)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-
+      <div id="articleMain" style="display:none;">
+        <span class="tag" id="articleTag">Web dev</span>
+        <h1 id="articleTitle">Article title</h1>
+        <div class="byline">By Auwion team · <span id="articleReadTime">4 min read</span></div>
+        <div class="hero-img" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="180" height="140" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
+<defs><linearGradient id="gview-hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
+<rect x="20" y="40" width="50" height="50" rx="8" stroke="url(#gview-hero)" stroke-width="4"/>
+<rect x="130" y="50" width="50" height="50" rx="8" stroke="url(#gview-hero)" stroke-width="4"/>
+<path d="M74 62h52M108 52l18 12-18 12" stroke="url(#gview-hero)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg></div>
-          <div class="article-body">
-            <p class="article-title">What actually changes during a BC migration</p>
-            <p class="article-meta">5 MIN READ</p>
-          </div>
-        </a>
-        <a href="article-odoo-modules.html" class="article-card">
-          <div class="article-thumb" data-tag="Odoo" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-Odoo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
-
-<rect x="34" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="82" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="130" y="34" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="58" y="78" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-<rect x="106" y="78" width="34" height="34" rx="6" stroke="url(#garticleshtml-thumb-Odoo)" stroke-width="4"/>
-
-</svg></div>
-          <div class="article-body">
-            <p class="article-title">Choosing the right Odoo modules to start with</p>
-            <p class="article-meta">4 MIN READ</p>
-          </div>
-        </a>
-        <a href="article-zoho-reconciliation.html" class="article-card">
-          <div class="article-thumb" data-tag="Zoho Books" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
-<defs><linearGradient id="garticleshtml-thumb-ZohoBooks" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
-
-<rect x="55" y="20" width="90" height="100" rx="8" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="4"/>
-<path d="M72 44h56M72 60h56M72 76h34" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="4" stroke-linecap="round"/>
-<path d="M74 96l10 10 20-22" stroke="url(#garticleshtml-thumb-ZohoBooks)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-
-</svg></div>
-          <div class="article-body">
-            <p class="article-title">Zoho Books reconciliation, monthly checklist</p>
-            <p class="article-meta">6 MIN READ</p>
-          </div>
-        </a>
+        <div class="body-copy" id="articleBody"></div>
+        <div class="inline-cta">
+          <p>Need help with something like this?</p>
+          <a href="about.html#contact" class="btn btn-ghost">Get in touch →</a>
+        </div>
       </div>
     </div>
   </section>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/supabase-client.js"></script>
 
 <footer>
   <div class="wrap">
@@ -560,6 +522,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
 <script>
   var toggle = document.getElementById('menuToggle');
   var mobileNav = document.getElementById('mobile-nav');
@@ -570,61 +534,52 @@
       toggle.textContent = isOpen ? 'CLOSE' : 'MENU';
     });
   }
-  var reveals = document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
-      });
-    }, {threshold:0.1});
-    reveals.forEach(function(el){ io.observe(el); });
-  } else {
-    reveals.forEach(function(el){ el.classList.add('in'); });
+
+  // Turns simple admin-written text into safe HTML:
+  // blank line = new paragraph, a line starting with "## " = subheading.
+  function renderArticleBody(raw){
+    var esc = function(s){
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    };
+    var blocks = raw.split(/\n\s*\n/);
+    return blocks.map(function(block){
+      var trimmed = block.trim();
+      if(trimmed.indexOf('## ') === 0){
+        return '<h2>' + esc(trimmed.slice(3)) + '</h2>';
+      }
+      return '<p>' + esc(trimmed).replace(/\n/g, '<br>') + '</p>';
+    }).join('\n');
   }
 
-  // Article filtering (re-runs after dynamic articles are appended too)
-  function wireArticleFilters(){
-    var filterPills = document.querySelectorAll('#articleFilters .filter-pill');
-    var articleCards = document.querySelectorAll('#articleGrid .article-card');
-    filterPills.forEach(function(pill){
-      pill.onclick = function(e){
-        e.preventDefault();
-        filterPills.forEach(function(p){ p.classList.remove('active'); });
-        pill.classList.add('active');
-        var filter = pill.getAttribute('data-filter');
-        articleCards.forEach(function(card){
-          var tag = card.querySelector('.article-thumb').getAttribute('data-tag');
-          card.style.display = (filter === 'All' || tag === filter) ? '' : 'none';
-        });
-      };
-    });
-  }
-  wireArticleFilters();
+  (async function loadArticle(){
+    var params = new URLSearchParams(window.location.search);
+    var slug = params.get('slug');
+    var loadingEl = document.getElementById('articleLoading');
+    var notFoundEl = document.getElementById('articleNotFound');
+    var mainEl = document.getElementById('articleMain');
 
-  // Load articles published from the admin panel and add them to the grid
-  (async function loadDynamicArticles(){
-    if(typeof auwionGetPublishedArticles !== 'function') return;
-    var result = await auwionGetPublishedArticles();
-    if(!result.ok || !result.articles || result.articles.length === 0) return;
+    if(!slug){
+      loadingEl.style.display = 'none';
+      notFoundEl.style.display = 'block';
+      return;
+    }
 
-    var grid = document.getElementById('articleGrid');
-    result.articles.forEach(function(a){
-      var card = document.createElement('a');
-      card.href = 'article-view.html?slug=' + encodeURIComponent(a.slug);
-      card.className = 'article-card';
-      card.innerHTML =
-        '<div class="article-thumb" data-tag="' + a.tag + '" style="display:flex;align-items:center;justify-content:center;">' +
-        '<svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="34" y="34" width="132" height="72" rx="10" stroke="#3B82F6" stroke-width="4"/>' +
-        '<path d="M56 62h88M56 82h60" stroke="#0FA898" stroke-width="4" stroke-linecap="round"/>' +
-        '</svg></div>' +
-        '<div class="article-body">' +
-        '<p class="article-title">' + a.title + '</p>' +
-        '<p class="article-meta">' + (a.read_time || '4 MIN READ') + '</p>' +
-        '</div>';
-      grid.appendChild(card);
-    });
-    wireArticleFilters();
+    var result = await auwionGetArticleBySlug(slug);
+    loadingEl.style.display = 'none';
+
+    if(!result.ok){
+      notFoundEl.style.display = 'block';
+      return;
+    }
+
+    var a = result.article;
+    document.title = a.title + ' — Auwion';
+    document.getElementById('crumbTitle').textContent = a.title;
+    document.getElementById('articleTag').textContent = a.tag || 'Web dev';
+    document.getElementById('articleTitle').textContent = a.title;
+    document.getElementById('articleReadTime').textContent = (a.read_time || '4 MIN READ').toLowerCase();
+    document.getElementById('articleBody').innerHTML = renderArticleBody(a.body || '');
+    mainEl.style.display = 'block';
   })();
 </script>
 </body>
