@@ -96,6 +96,41 @@ async function adminSignOut() {
   await adminSupabase.auth.signOut();
 }
 
+// ---------- Forgot password: step 1, request the reset email ----------
+// Always returns ok:true regardless of whether the email actually belongs
+// to an admin (or exists at all) — this deliberately avoids revealing
+// which email addresses have admin accounts to whoever is at the form.
+async function adminRequestPasswordReset({ email }) {
+  try {
+    await adminSupabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname.replace('forgot-password.html', 'reset-password.html'),
+    });
+  } catch (e) { /* fall through to the same generic response either way */ }
+  return { ok: true };
+}
+
+// ---------- Forgot password: step 2, set the new password ----------
+// Called from reset-password.html after the admin arrives via the emailed
+// link. Supabase's client automatically turns that link's token into a
+// temporary "recovery" session (see detectSessionInUrl, on by default), so
+// this just needs to update the password on that session.
+async function adminUpdatePassword({ password }) {
+  const { error } = await adminSupabase.auth.updateUser({ password });
+  if (error) {
+    return { ok: false, message: error.message || 'Could not update password. The reset link may have expired.' };
+  }
+  return { ok: true };
+}
+
+// ---------- Detect an active password-recovery session ----------
+// Used by reset-password.html to decide whether to show the "set new
+// password" form (valid recovery link) or an error state (missing/expired
+// link, or the page was opened directly without going through email).
+async function adminHasRecoverySession() {
+  const { data } = await adminSupabase.auth.getSession();
+  return !!data?.session;
+}
+
 // ---------- Route guard: call at the top of every protected admin page ----------
 // Redirects to login.html if there's no session, or if the session belongs
 // to someone who isn't an active admin (and ends that session so they can't
