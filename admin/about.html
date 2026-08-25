@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Services — Auwion</title>
-<meta name="description" content="Implementation, support, and integrations for Business Central, Zoho Books, and Odoo — plus web development and bookkeeping, all from one team.">
+<title>About & contact — Auwion</title>
+<meta name="description" content="Auwion has delivered 20+ Business Central projects since 2020. Get in touch to talk about Business Central, Zoho Books, Odoo, or your web systems.">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="256x256" href="favicon-256.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -417,11 +417,15 @@
   .field select{
     width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
     background:rgba(255,255,255,0.03);color:var(--text);font-size:14px;font-family:var(--font-body);
+    color-scheme:dark;
+  }
+  .field select option{
+    background:#151030;color:#FFFFFF;
   }
 
 </style>
 </head>
-<body data-cms-page="services">
+<body data-cms-page="about">
 
 <header class="site">
   <div class="wrap nav">
@@ -450,38 +454,44 @@
 <main>
   <section style="padding-top:60px;">
     <div class="wrap">
-      <div class="breadcrumb"><a href="index.html">Home</a> / Services</div>
-      <div class="section-head reveal">
-        <div class="eyebrow" id="cms-eyebrow">Our services</div>
-        <h2 class="section-title" style="font-size:clamp(30px,4vw,44px);" id="cms-title">What we do</h2>
-        <p class="section-sub" id="cms-sub">Four platforms, one team — plus book keeping that works across all of them.</p>
+      <div class="section-head reveal in">
+        <div class="eyebrow" id="cms-eyebrow">About</div>
+        <h1 class="section-title" style="font-size:clamp(30px,4vw,44px);" id="cms-headline">About Auwion</h1>
       </div>
-      <div class="services-table reveal">
-        <a href="business-central.html" class="service-row">
-          <span class="service-name">Business Central</span>
-          <span class="service-desc">Implementation, custom AL development, integrations, migration, and ongoing support.</span>
-          <span class="service-arrow">View →</span>
-        </a>
-        <a href="zoho-books.html" class="service-row">
-          <span class="service-name">Zoho Books</span>
-          <span class="service-desc">Implementation, support, and bookkeeping for teams running on Zoho.</span>
-          <span class="service-arrow">View →</span>
-        </a>
-        <a href="odoo.html" class="service-row">
-          <span class="service-name">Odoo</span>
-          <span class="service-desc">Implementation and support across the Odoo modules you need.</span>
-          <span class="service-arrow">View →</span>
-        </a>
-        <a href="web-development.html" class="service-row">
-          <span class="service-name">Web development</span>
-          <span class="service-desc">Web apps and sites, including the ones that connect to your ERP.</span>
-          <span class="service-arrow">View →</span>
-        </a>
-        <a href="bookkeeping.html" class="service-row">
-          <span class="service-name">Book keeping</span>
-          <span class="service-desc">Ongoing books management — works across Business Central, Zoho Books, and Odoo.</span>
-          <span class="service-arrow">View →</span>
-        </a>
+      <div class="contact-grid">
+        <div class="about-copy reveal in">
+          <p id="cms-para-1">We started Auwion in 2020 with a simple idea: proper ERP implementation shouldn't cost a fortune. Six years and 20+ Business Central projects later, that's still what drives us — fair, honest pricing without cutting corners on the work.</p>
+          <p id="cms-para-2">Our team is built around real Business Central expertise: certified Business Central consultants and developers, backed by hands-on experience across concrete batching, plastic bag manufacturing, fashion, banking, and education. That range means we've usually seen a business like yours before.</p>
+          <p id="cms-para-3">What clients tell us keeps them coming back is simple — we're responsive, we tailor support instead of running a script, and we know how to make Business Central, Zoho Books, and Odoo actually talk to the rest of your systems.</p>
+          <div class="badge-row" style="margin-top:28px;">
+            <span class="badge"><span class="dot"></span><a href="tel:+94711222528" style="color:inherit;text-decoration:none;">+94 71 122 2528</a></span>
+            <span class="badge"><span class="dot"></span><a href="mailto:hasith@auwion.com" style="color:inherit;text-decoration:none;">hasith@auwion.com</a></span>
+            <span class="badge"><span class="dot"></span>1142/2, Wasawalatta Lane, Pannipitiya, Sri Lanka</span>
+            <span class="badge"><span class="dot"></span><a href="https://www.linkedin.com/company/auwion" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">LinkedIn</a></span>
+          </div>
+        </div>
+        <div class="form-card reveal in" id="contact">
+          <h3 style="font-family:var(--font-display);font-size:18px;margin:0 0 18px;">Get in touch</h3>
+          <form id="contactForm" onsubmit="return false;">
+            <div class="field"><label for="cname">Name</label><input type="text" id="cname" placeholder="Your name"></div>
+            <div class="field"><label for="cemail">Email</label><input type="email" id="cemail" placeholder="name@company.com"></div>
+            <div class="field"><label for="ccompany">Company</label><input type="text" id="ccompany" placeholder="Company name"></div>
+            <div class="field">
+              <label for="cinterest">Interested in</label>
+              <select id="cinterest">
+                <option>Business Central</option>
+                <option>Zoho Books</option>
+                <option>Odoo</option>
+                <option>Web development</option>
+                <option>Book keeping</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field"><label for="cmessage">Message</label><textarea id="cmessage" placeholder="Tell us what you're working with"></textarea></div>
+            <div id="contactMessage" style="display:none;font-size:13px;margin-bottom:12px;"></div>
+            <button type="submit" id="contactBtn" class="btn btn-primary auth-submit">Send message</button>
+          </form>
+        </div>
       </div>
     </div>
   </section>
@@ -554,6 +564,57 @@
   } else {
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js?v=3"></script>
+<script>
+  document.getElementById('contactForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var btn = document.getElementById('contactBtn');
+    var msg = document.getElementById('contactMessage');
+    var name = document.getElementById('cname').value.trim();
+    var email = document.getElementById('cemail').value.trim();
+
+    msg.style.display = 'none';
+
+    if (!name || !email) {
+      msg.textContent = 'Please fill in your name and email.';
+      msg.style.color = 'var(--pink)';
+      msg.style.display = 'block';
+      return;
+    }
+
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+      var result = await auwionSendMessage({
+        fullName: name,
+        email: email,
+        companyName: document.getElementById('ccompany').value.trim(),
+        interestedIn: document.getElementById('cinterest').value,
+        message: document.getElementById('cmessage').value.trim()
+      });
+
+      if (result.ok) {
+        document.getElementById('contactForm').reset();
+        msg.textContent = "Thanks — we've got your message and will be in touch soon.";
+        msg.style.color = 'var(--teal-soft)';
+        msg.style.display = 'block';
+      } else {
+        msg.textContent = result.message || 'Something went wrong. Please try again.';
+        msg.style.color = 'var(--pink)';
+        msg.style.display = 'block';
+      }
+    } catch (err) {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.style.color = 'var(--pink)';
+      msg.style.display = 'block';
+    } finally {
+      btn.textContent = 'Send message';
+      btn.disabled = false;
+    }
+  });
 </script>
 <!-- CMS content loader: fills in admin-edited text if a published version
      exists in Supabase; otherwise the hand-written content above stands
