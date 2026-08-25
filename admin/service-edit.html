@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Service — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+<style>
+  .fieldset{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+  .fieldset h3{font-family:var(--font-display);font-size:15px;margin:0 0 16px;}
+  .block-card{border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;}
+  .block-card:last-child{margin-bottom:0;}
+  .block-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .block-card-head .anchor{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .field-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+  @media(max-width:700px){.field-row{grid-template-columns:1fr;}}
+  .sticky-actions{
+    position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1 id="editorTitle">Edit service</h1>
+      <p id="editorSlugLine" style="font-family:var(--font-mono);"></p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge" id="statusBadge"></span>
+      <a href="services.html" class="btn btn-secondary btn-sm">← Back to Services</a>
+    </div>
+  </div>
+
+  <div id="editorError"></div>
+  <div id="editorBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  // The 10 icons currently available (matching assets/site-cms.js's
+  // SERVICE_ICONS library exactly). Adding new icon designs isn't
+  // supported from this screen yet — only picking among existing ones.
+  const ICON_OPTIONS = ['implementation', 'al-dev', 'shopify', 'migration', 'integrations', 'support', 'training', 'bookkeeping', 'webapp', 'website'];
+
+  let currentService = null;
+  let currentBlocks = [];
+
+  (async function () {
+    const admin = await initAdminShell('services');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('No service specified.');
+      return;
+    }
+    await loadService(slug);
+  })();
+
+  async function loadService(slug) {
+    try {
+      const { data: service, error: serviceError } = await adminSupabase
+        .from('services')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (serviceError) throw serviceError;
+      if (!service) {
+        document.getElementById('editorError').innerHTML = renderErrorBanner('Service not found: ' + slug);
+        return;
+      }
+
+      const { data: blocks, error: blocksError } = await adminSupabase
+        .from('service_blocks')
+        .select('*')
+        .eq('service_id', service.id)
+        .order('display_order', { ascending: true });
+
+      if (blocksError) throw blocksError;
+
+      currentService = service;
+      currentBlocks = blocks || [];
+
+      document.getElementById('editorTitle').textContent = service.name;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + service.slug;
+      updateStatusBadge(service.status);
+
+      renderEditor();
+    } catch (err) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('Could not load service: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+
+  function updateStatusBadge(status) {
+    const el = document.getElementById('statusBadge');
+    el.textContent = status;
+    el.className = 'badge ' + (status === 'published' ? 'badge-published' : 'badge-draft');
+  }
+
+  function renderEditor() {
+    const body = document.getElementById('editorBody');
+
+    let html = `
+      <div class="fieldset">
+        <h3>Service details</h3>
+        <div class="ac-field">
+          <label for="serviceName">Name (shown in the services table on Home &amp; Services)</label>
+          <input type="text" id="serviceName">
+        </div>
+        <div class="ac-field">
+          <label for="serviceDesc">Short description</label>
+          <textarea id="serviceDesc" rows="2"></textarea>
+        </div>
+      </div>
+    `;
+
+    if (currentBlocks.length > 0) {
+      html += '<div class="fieldset"><h3>Sub-service blocks</h3>';
+      currentBlocks.forEach(function (b, i) {
+        html += `
+          <div class="block-card">
+            <div class="block-card-head">
+              <strong>Block ${i + 1}</strong>
+              <span class="anchor">#${escapeHtml(b.anchor_id || '')}</span>
+            </div>
+            <div class="ac-field">
+              <label for="blockTitle-${i}">Title</label>
+              <input type="text" id="blockTitle-${i}">
+            </div>
+            <div class="ac-field">
+              <label for="blockDesc-${i}">Description</label>
+              <textarea id="blockDesc-${i}" rows="2"></textarea>
+            </div>
+            <div class="ac-field" style="max-width:220px;">
+              <label for="blockIcon-${i}">Icon</label>
+              <select id="blockIcon-${i}">
+                ${ICON_OPTIONS.map(function (k) { return '<option value="' + k + '">' + k + '</option>'; }).join('')}
+              </select>
+            </div>
+          </div>
+        `;
+      });
+      html += '<p style="font-size:12px;color:var(--text-dim);margin-top:4px;">Adding or removing blocks, and reordering them, isn\'t supported from this screen yet — only editing existing ones.</p></div>';
+    } else {
+      html += renderStateBlock({
+        icon: 'services',
+        title: 'No sub-service blocks',
+        description: 'This service (Book keeping) uses its own page content instead — edit it from Pages → Book Keeping.',
+      });
+    }
+
+    html += `
+      <div class="sticky-actions">
+        <div class="status-toggle">
+          <label style="font-size:13px;font-weight:600;color:var(--text-soft);">Status</label>
+          <select id="statusSelect" class="ac-field" style="width:auto;padding:8px 12px;">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <a href="../${escapeHtml(currentService.slug)}.html" target="_blank" class="btn btn-secondary">Preview live page ↗</a>
+          <button class="btn btn-primary" id="saveBtn">Save changes</button>
+        </div>
+      </div>
+    `;
+
+    body.innerHTML = html;
+
+    document.getElementById('serviceName').value = currentService.name || '';
+    document.getElementById('serviceDesc').value = currentService.short_description || '';
+    document.getElementById('statusSelect').value = currentService.status;
+
+    currentBlocks.forEach(function (b, i) {
+      document.getElementById('blockTitle-' + i).value = b.title || '';
+      document.getElementById('blockDesc-' + i).value = b.description || '';
+      document.getElementById('blockIcon-' + i).value = b.icon_key || ICON_OPTIONS[0];
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', saveService);
+  }
+
+  async function saveService() {
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      const { data: updatedService, error: serviceError } = await adminSupabase
+        .from('services')
+        .update({
+          name: document.getElementById('serviceName').value,
+          short_description: document.getElementById('serviceDesc').value,
+          status: document.getElementById('statusSelect').value,
+        })
+        .eq('id', currentService.id)
+        .select()
+        .single();
+
+      if (serviceError) throw serviceError;
+      currentService = updatedService;
+
+      // Save each block individually — small number of rows (2-7), so
+      // sequential updates keep this simple and give a clear error if
+      // one specific block fails, rather than an all-or-nothing batch.
+      for (let i = 0; i < currentBlocks.length; i++) {
+        const { data: updatedBlock, error: blockError } = await adminSupabase
+          .from('service_blocks')
+          .update({
+            title: document.getElementById('blockTitle-' + i).value,
+            description: document.getElementById('blockDesc-' + i).value,
+            icon_key: document.getElementById('blockIcon-' + i).value,
+          })
+          .eq('id', currentBlocks[i].id)
+          .select()
+          .single();
+
+        if (blockError) throw blockError;
+        currentBlocks[i] = updatedBlock;
+      }
+
+      updateStatusBadge(currentService.status);
+      showToast({ type: 'success', message: 'Service saved. Changes are live if published.' });
+    } catch (err) {
+      showToast({ type: 'error', message: 'Save failed: ' + (err && err.message ? err.message : 'unknown error') });
+    } finally {
+      btn.textContent = 'Save changes';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
