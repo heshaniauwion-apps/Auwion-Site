@@ -150,6 +150,110 @@
     }
   }
 
+  // ---------------------------------------------------------------------
+  // Service sub-block icons — extracted verbatim from the original
+  // hand-coded SVGs on business-central.html / zoho-books.html / odoo.html
+  // / web-development.html. Confirmed identical paths were reused across
+  // pages for "implementation", "support", and "bookkeeping" — so those
+  // three are shared here too, rather than duplicated per page.
+  // ---------------------------------------------------------------------
+  const SERVICE_ICONS = {
+    implementation: '<rect x="20" y="20" width="80" height="80" rx="14" stroke="{{grad}}" stroke-width="3"/><path d="M38 62l16 16 30-34" stroke="{{grad}}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>',
+    'al-dev': '<path d="M42 34L20 60l22 26" stroke="{{grad}}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 34l22 26-22 26" stroke="{{grad}}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M68 26L52 94" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/>',
+    shopify: '<path d="M32 40h56l6 54a8 8 0 0 1-8 8H34a8 8 0 0 1-8-8l6-54z" stroke="{{grad}}" stroke-width="4" stroke-linejoin="round"/><path d="M46 40v-6a14 14 0 0 1 28 0v6" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/><path d="M60 62c14 4 14 16 0 16s-14 12 0 16" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/>',
+    migration: '<rect x="14" y="30" width="34" height="34" rx="6" stroke="{{grad}}" stroke-width="4"/><rect x="72" y="56" width="34" height="34" rx="6" stroke="{{grad}}" stroke-width="4"/><path d="M50 46h34M74 40l10 6-10 6" stroke="{{grad}}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+    integrations: '<circle cx="30" cy="34" r="12" stroke="{{grad}}" stroke-width="4"/><circle cx="90" cy="34" r="12" stroke="{{grad}}" stroke-width="4"/><circle cx="60" cy="86" r="12" stroke="{{grad}}" stroke-width="4"/><path d="M40 40l14 38M80 40L66 78" stroke="{{grad}}" stroke-width="3"/>',
+    support: '<path d="M24 62a36 36 0 0 1 72 0" stroke="{{grad}}" stroke-width="5" stroke-linecap="round"/><rect x="18" y="60" width="16" height="24" rx="6" stroke="{{grad}}" stroke-width="4"/><rect x="86" y="60" width="16" height="24" rx="6" stroke="{{grad}}" stroke-width="4"/><path d="M34 84v6a10 10 0 0 0 10 10h8" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/>',
+    training: '<path d="M20 46l40-16 40 16-40 16-40-16z" stroke="{{grad}}" stroke-width="4" stroke-linejoin="round"/><path d="M38 54v22c0 6 10 12 22 12s22-6 22-12V54" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/><path d="M92 46v22" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/>',
+    bookkeeping: '<rect x="26" y="18" width="68" height="84" rx="6" stroke="{{grad}}" stroke-width="4"/><path d="M40 38h40M40 54h40M40 70h26" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/><path d="M60 84l8 8 14-16" stroke="{{grad}}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
+    webapp: '<rect x="14" y="24" width="92" height="66" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M14 40h92" stroke="{{grad}}" stroke-width="4"/><circle cx="26" cy="32" r="2.4" fill="{{grad}}"/><circle cx="35" cy="32" r="2.4" fill="{{grad}}"/><path d="M44 62l-12 10 12 10M76 62l12 10-12 10M64 58l-8 28" stroke="{{grad}}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
+    website: '<rect x="14" y="24" width="92" height="66" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M14 40h92" stroke="{{grad}}" stroke-width="4"/><circle cx="26" cy="32" r="2.4" fill="{{grad}}"/><circle cx="35" cy="32" r="2.4" fill="{{grad}}"/><rect x="26" y="50" width="24" height="30" rx="3" stroke="{{grad}}" stroke-width="3"/><path d="M58 52h34M58 62h34M58 72h22" stroke="{{grad}}" stroke-width="3" stroke-linecap="round"/>',
+  };
+
+  function renderServiceIcon(iconKey, uniqueId) {
+    const gradId = 'gsvc-' + uniqueId;
+    const paths = (SERVICE_ICONS[iconKey] || '').split('{{grad}}').join('url(#' + gradId + ')');
+    return '<svg viewBox="0 0 120 120" width="72" height="72" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">' +
+      '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>' +
+      paths + '</svg>';
+  }
+
+  // ---------------------------------------------------------------------
+  // Renders the anchor-nav pills + sub-block list on a service detail
+  // page (Business Central / Zoho Books / Odoo / Web development), from
+  // the services + service_blocks tables. Alternating left/right layout
+  // is preserved by flipping direction on odd indices, matching the
+  // original hand-coded pattern exactly.
+  // ---------------------------------------------------------------------
+  async function loadServiceBlocks(serviceSlug) {
+    const navEl = document.getElementById('cms-anchor-nav');
+    const blocksEl = document.getElementById('cms-subblocks');
+    if (!navEl || !blocksEl) return;
+
+    try {
+      const { data: service, error: serviceError } = await cmsClient
+        .from('services')
+        .select('id')
+        .eq('slug', serviceSlug)
+        .eq('status', 'published')
+        .maybeSingle();
+
+      if (serviceError || !service) return; // keep built-in blocks as-is
+
+      const { data: blocks, error: blocksError } = await cmsClient
+        .from('service_blocks')
+        .select('anchor_id, title, description, icon_key, display_order')
+        .eq('service_id', service.id)
+        .order('display_order', { ascending: true });
+
+      if (blocksError || !blocks || blocks.length === 0) return;
+
+      navEl.innerHTML = blocks.map(function (b) {
+        return '<a href="#' + escapeHtmlLite(b.anchor_id) + '">' + escapeHtmlLite(b.title) + '</a>';
+      }).join('');
+
+      blocksEl.innerHTML = blocks.map(function (b, i) {
+        const flipped = i % 2 === 1;
+        const visualStyle = flipped ? 'direction:rtl;display:flex;align-items:center;justify-content:center;' : 'display:flex;align-items:center;justify-content:center;';
+        const contentAttr = flipped ? " style='direction:ltr'" : ' ';
+        return '<div class="sub-block" id="' + escapeHtmlLite(b.anchor_id) + '">' +
+          '<div class="visual" style="' + visualStyle + '">' + renderServiceIcon(b.icon_key, b.anchor_id + '-' + i) + '</div>' +
+          '<div' + contentAttr + '><h3>' + escapeHtmlLite(b.title) + '</h3><p>' + escapeHtmlLite(b.description) + '</p></div>' +
+          '</div>';
+      }).join('');
+    } catch (e) {
+      console.warn('[site-cms] Failed to load service blocks for "' + serviceSlug + '":', e && e.message);
+      // Built-in blocks stand unchanged.
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Renders the 5-row services table (used on both Home and Services
+  // overview) from the services table.
+  // ---------------------------------------------------------------------
+  async function loadServicesTable() {
+    const tableEl = document.getElementById('cms-services-table');
+    if (!tableEl) return;
+
+    try {
+      const { data, error } = await cmsClient
+        .from('services')
+        .select('slug, name, short_description')
+        .eq('status', 'published')
+        .order('display_order', { ascending: true });
+
+      if (error || !data || data.length === 0) return; // keep built-in rows as-is
+
+      tableEl.innerHTML = data.map(function (s) {
+        return '<a href="' + escapeHtmlLite(s.slug) + '.html" class="service-row">' +
+          '<span class="service-name">' + escapeHtmlLite(s.name) + '</span>' +
+          '<span class="service-desc">' + escapeHtmlLite(s.short_description) + '</span>' +
+          '<span class="service-arrow">View →</span></a>';
+      }).join('');
+    } catch (e) {
+      console.warn('[site-cms] Failed to load services table:', e && e.message);
+    }
+  }
   const PAGE_RENDERERS = {
     home: applyHomeContent,
     services: applyServicesContent,
@@ -301,6 +405,17 @@
   // ---------------------------------------------------------------------
   async function loadCmsPageContent() {
     const slug = document.body.getAttribute('data-cms-page');
+
+    // These two are independent of the page-content renderer above and
+    // run on any page that has the matching container elements —
+    // loadServicesTable() only does anything on Home/Services (which
+    // have #cms-services-table), and loadServiceBlocks() only on the
+    // 4 service detail pages (which have #cms-subblocks).
+    loadServicesTable();
+    if (slug === 'business-central' || slug === 'zoho-books' || slug === 'odoo' || slug === 'web-development') {
+      loadServiceBlocks(slug);
+    }
+
     if (!slug || !PAGE_RENDERERS[slug]) {
       setState('fallback');
       return;
