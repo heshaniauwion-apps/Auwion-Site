@@ -263,7 +263,7 @@
   }
 </style>
 </head>
-<body>
+<body data-cms-page="home">
 
 <header class="site">
   <div class="wrap nav">
@@ -328,24 +328,24 @@
     </svg>
 
     <div class="wrap">
-      <div class="eyebrow">Auwion — Systems built right, delivered fast</div>
-      <h1 class="headline">Systems built right. <span class="grad">Delivered fast.</span></h1>
-      <p class="sub">We implement and support Business Central, Zoho Books, and Odoo, and build the web apps and sites that extend them — with the expertise to get it right and the speed to get it done.</p>
+      <div class="eyebrow" id="cms-hero-eyebrow">Auwion — Systems built right, delivered fast</div>
+      <h1 class="headline"><span id="cms-headline-plain">Systems built right. </span><span class="grad" id="cms-headline-highlight">Delivered fast.</span></h1>
+      <p class="sub" id="cms-hero-sub">We implement and support Business Central, Zoho Books, and Odoo, and build the web apps and sites that extend them — with the expertise to get it right and the speed to get it done.</p>
       <div class="hero-ctas">
-        <a href="services.html" class="btn btn-primary">Explore services</a>
-        <a href="about.html#contact" class="btn btn-ghost">Talk to us</a>
+        <a href="services.html" class="btn btn-primary" id="cms-cta-primary">Explore services</a>
+        <a href="about.html#contact" class="btn btn-ghost" id="cms-cta-secondary">Talk to us</a>
       </div>
 
       <!-- Signature: balance card -->
       <div class="ledger reveal">
         <div class="ledger-head">
-          <span class="label">The entry</span>
-          <span class="no">Folio — Auwion</span>
+          <span class="label" id="cms-ledger-label">The entry</span>
+          <span class="no" id="cms-ledger-no">Folio — Auwion</span>
         </div>
         <div class="ledger-body">
           <div class="ledger-col debit">
-            <h3>What's costing you</h3>
-            <ul>
+            <h3 id="cms-debit-title">What's costing you</h3>
+            <ul id="cms-debit-list">
               <li>Manual reconciliation, every month</li>
               <li>Systems that don't talk to each other</li>
               <li>A migration nobody wants to touch</li>
@@ -353,8 +353,8 @@
             </ul>
           </div>
           <div class="ledger-col credit">
-            <h3>What Auwion brings</h3>
-            <ul>
+            <h3 id="cms-credit-title">What Auwion brings</h3>
+            <ul id="cms-credit-list">
               <li>Implementation done right the first time</li>
               <li>Integrations that actually sync</li>
               <li>Migrations handled end to end</li>
@@ -363,8 +363,8 @@
           </div>
         </div>
         <div class="ledger-foot">
-          <span>Debit vs. credit</span>
-          <span class="balance">✓ Balanced</span>
+          <span id="cms-balance-label">Debit vs. credit</span>
+          <span class="balance" id="cms-balance-text">✓ Balanced</span>
         </div>
       </div>
     </div>
@@ -374,9 +374,9 @@
   <section id="services">
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">Our services</div>
-        <h2 class="section-title">What we do</h2>
-        <p class="section-sub">Four lines of work, one team. Each one connects back to the others when it needs to.</p>
+        <div class="eyebrow" id="cms-services-eyebrow">Our services</div>
+        <h2 class="section-title" id="cms-services-title">What we do</h2>
+        <p class="section-sub" id="cms-services-sub">Four lines of work, one team. Each one connects back to the others when it needs to.</p>
       </div>
 
       <div class="services-table reveal">
@@ -413,11 +413,11 @@
   <section class="why">
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">Why Auwion</div>
-        <h2 class="section-title">Systems people, not just software people</h2>
-        <p class="section-sub">One team across implementation, support, and the books — so nothing falls into the gap between vendors.</p>
+        <div class="eyebrow" id="cms-why-eyebrow">Why Auwion</div>
+        <h2 class="section-title" id="cms-why-title">Systems people, not just software people</h2>
+        <p class="section-sub" id="cms-why-sub">One team across implementation, support, and the books — so nothing falls into the gap between vendors.</p>
       </div>
-      <div class="why-grid reveal">
+      <div class="why-grid reveal" id="cms-why-grid">
         <div class="why-card">
           <span class="tag">Cross-platform</span>
           <p>Certified across Business Central, Zoho Books, and Odoo, so the recommendation fits your business, not our specialty.</p>
@@ -438,9 +438,9 @@
   <section id="articles">
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="eyebrow">From the ledger</div>
-        <h2 class="section-title">Notes from the field</h2>
-        <p class="section-sub">Guides and updates on Business Central, Zoho Books, Odoo, and web development.</p>
+        <div class="eyebrow" id="cms-articles-eyebrow">From the ledger</div>
+        <h2 class="section-title" id="cms-articles-title">Notes from the field</h2>
+        <p class="section-sub" id="cms-articles-sub">Guides and updates on Business Central, Zoho Books, Odoo, and web development.</p>
       </div>
       <div class="article-grid reveal">
         <a href="article-bc-migration.html" class="article-card">
@@ -496,9 +496,9 @@
   <section id="contact">
     <div class="wrap">
       <div class="cta-band reveal">
-        <h2>Ready to get started?</h2>
-        <p>Tell us what you're working with — we'll help you find the right fit.</p>
-        <a href="about.html#contact" class="btn btn-dark">Get in touch</a>
+        <h2 id="cms-cta-heading">Ready to get started?</h2>
+        <p id="cms-cta-text">Tell us what you're working with — we'll help you find the right fit.</p>
+        <a href="about.html#contact" class="btn btn-dark" id="cms-cta-button">Get in touch</a>
       </div>
     </div>
   </section>
@@ -575,6 +575,12 @@
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
 </script>
+
+<!-- CMS content loader: fills in admin-edited text if a published version
+     exists in Supabase; otherwise the hand-written content above stands
+     unchanged. See assets/site-cms.js. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-cms.js"></script>
 
 </body>
 </html>
