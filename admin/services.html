@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1>Services</h1>
+      <p>The 5 services shown on Home and the Services page, plus their sub-service blocks (Business Central, Zoho Books, Odoo, Web Development, Book Keeping).</p>
+    </div>
+    <button class="btn btn-primary" disabled title="Coming soon">+ Add service</button>
+  </div>
+
+  <div id="servicesResult">
+    <div style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:40px 0;text-align:center;">Loading services…</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  (async function () {
+    const admin = await initAdminShell('services');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+    loadServices();
+  })();
+
+  async function loadServices() {
+    const container = document.getElementById('servicesResult');
+    try {
+      const { data, error } = await adminSupabase
+        .from('services')
+        .select('id, slug, name, status, display_order, updated_at')
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        container.innerHTML = renderStateBlock({
+          icon: 'services',
+          title: 'No services yet',
+          description: 'Management for your 5 services and their sub-service blocks is coming in the next step.',
+        });
+        return;
+      }
+
+      const rows = data.map(function (s) {
+        const badge = s.status === 'published' ? 'badge-published' : 'badge-draft';
+        return '<tr class="clickable"><td>' + escapeHtml(s.name) + '</td><td><code>' + escapeHtml(s.slug) + '</code></td>' +
+          '<td>' + s.display_order + '</td><td><span class="badge ' + badge + '">' + escapeHtml(s.status) + '</span></td><td>' + formatDate(s.updated_at) + '</td></tr>';
+      }).join('');
+
+      container.innerHTML =
+        '<div class="ac-table-wrap"><div class="table-scroll"><table class="ac-table">' +
+        '<thead><tr><th>Name</th><th>Slug</th><th>Order</th><th>Status</th><th>Updated</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></div>';
+    } catch (err) {
+      container.innerHTML = renderErrorBanner('Could not load services: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+</script>
+</body>
+</html>

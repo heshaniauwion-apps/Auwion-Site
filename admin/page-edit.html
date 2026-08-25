@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Page — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+<style>
+  .fieldset{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+  .fieldset h3{font-family:var(--font-display);font-size:15px;margin:0 0 16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:700px){.field-row{grid-template-columns:1fr;}}
+  .card-group{border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;}
+  .card-group:last-child{margin-bottom:0;}
+  .status-toggle{display:flex;align-items:center;gap:10px;}
+  .sticky-actions{
+    position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1 id="editorTitle">Edit page</h1>
+      <p id="editorSlugLine" style="font-family:var(--font-mono);"></p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge" id="statusBadge"></span>
+      <a href="pages.html" class="btn btn-secondary btn-sm">← Back to Pages</a>
+    </div>
+  </div>
+
+  <div id="editorError"></div>
+  <div id="editorBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  // ---------------------------------------------------------------------
+  // Field schema for Home. This is the only fully-implemented page in
+  // this step — the shape mirrors index.html's real, current content
+  // exactly (see /supabase/migrations and the CMS content already saved
+  // for slug='home'). Other slugs fall back to a generic status-only
+  // editor until their schemas are added in a later step.
+  // ---------------------------------------------------------------------
+  const HOME_SCHEMA = [
+    { section: 'Hero', fields: [
+      { path: 'hero.eyebrow', label: 'Eyebrow text', type: 'text' },
+      { path: 'hero.headline_plain', label: 'Headline — plain part', type: 'text' },
+      { path: 'hero.headline_highlight', label: 'Headline — highlighted part', type: 'text' },
+      { path: 'hero.sub', label: 'Subtext', type: 'textarea' },
+      { path: 'hero.cta_primary_label', label: 'Primary button label', type: 'text' },
+      { path: 'hero.cta_primary_link', label: 'Primary button link', type: 'text' },
+      { path: 'hero.cta_secondary_label', label: 'Secondary button label', type: 'text' },
+      { path: 'hero.cta_secondary_link', label: 'Secondary button link', type: 'text' },
+    ]},
+    { section: 'Ledger card', fields: [
+      { path: 'ledger.label', label: 'Label', type: 'text' },
+      { path: 'ledger.no', label: 'Folio text', type: 'text' },
+      { path: 'ledger.debit_title', label: 'Debit column title', type: 'text' },
+      { path: 'ledger.debit_items', label: 'Debit items (one per line)', type: 'lines' },
+      { path: 'ledger.credit_title', label: 'Credit column title', type: 'text' },
+      { path: 'ledger.credit_items', label: 'Credit items (one per line)', type: 'lines' },
+      { path: 'ledger.balance_label', label: 'Balance label', type: 'text' },
+      { path: 'ledger.balance_text', label: 'Balance text', type: 'text' },
+    ]},
+    { section: 'Services section intro', fields: [
+      { path: 'services_intro.eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'services_intro.title', label: 'Title', type: 'text' },
+      { path: 'services_intro.sub', label: 'Subtitle', type: 'textarea' },
+    ]},
+    { section: 'Why Auwion section', fields: [
+      { path: 'why.eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'why.title', label: 'Title', type: 'text' },
+      { path: 'why.sub', label: 'Subtitle', type: 'textarea' },
+      { path: 'why.cards.0.tag', label: 'Card 1 — tag', type: 'text', group: 'Card 1' },
+      { path: 'why.cards.0.text', label: 'Card 1 — text', type: 'textarea', group: 'Card 1' },
+      { path: 'why.cards.1.tag', label: 'Card 2 — tag', type: 'text', group: 'Card 2' },
+      { path: 'why.cards.1.text', label: 'Card 2 — text', type: 'textarea', group: 'Card 2' },
+      { path: 'why.cards.2.tag', label: 'Card 3 — tag', type: 'text', group: 'Card 3' },
+      { path: 'why.cards.2.text', label: 'Card 3 — text', type: 'textarea', group: 'Card 3' },
+    ]},
+    { section: 'Articles section intro', fields: [
+      { path: 'articles_intro.eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'articles_intro.title', label: 'Title', type: 'text' },
+      { path: 'articles_intro.sub', label: 'Subtitle', type: 'textarea' },
+    ]},
+    { section: 'Bottom CTA band', fields: [
+      { path: 'cta_band.heading', label: 'Heading', type: 'text' },
+      { path: 'cta_band.text', label: 'Text', type: 'textarea' },
+      { path: 'cta_band.button_label', label: 'Button label', type: 'text' },
+      { path: 'cta_band.button_link', label: 'Button link', type: 'text' },
+    ]},
+  ];
+
+  const PAGE_SCHEMAS = { home: HOME_SCHEMA };
+
+  // Note on scope: the Services table rows (shown on both Home and
+  // Services) and the 3 article cards (shown on both Home and Articles)
+  // are intentionally NOT editable here — they're repeated, structured
+  // data that will be managed once from the Services and Articles
+  // sections respectively, not duplicated per-page.
+
+  let currentPage = null;
+  let workingContent = {};
+
+  function getPath(obj, path) {
+    return path.split('.').reduce(function (o, k) { return (o || {})[k]; }, obj);
+  }
+  function setPath(obj, path, value) {
+    const keys = path.split('.');
+    let cur = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (cur[k] === undefined || cur[k] === null) {
+        cur[k] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+      }
+      cur = cur[k];
+    }
+    cur[keys[keys.length - 1]] = value;
+  }
+
+  (async function () {
+    const admin = await initAdminShell('pages');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('No page specified.');
+      return;
+    }
+
+    await loadPage(slug);
+  })();
+
+  async function loadPage(slug) {
+    try {
+      const { data, error } = await adminSupabase
+        .from('pages')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) {
+        document.getElementById('editorError').innerHTML = renderErrorBanner('Page not found: ' + slug);
+        return;
+      }
+
+      currentPage = data;
+      workingContent = JSON.parse(JSON.stringify(data.content || {}));
+
+      document.getElementById('editorTitle').textContent = data.title;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + data.slug;
+      updateStatusBadge(data.status);
+
+      renderEditor(slug);
+    } catch (err) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('Could not load page: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+
+  function updateStatusBadge(status) {
+    const el = document.getElementById('statusBadge');
+    el.textContent = status;
+    el.className = 'badge ' + (status === 'published' ? 'badge-published' : 'badge-draft');
+  }
+
+  function renderEditor(slug) {
+    const schema = PAGE_SCHEMAS[slug];
+    const body = document.getElementById('editorBody');
+
+    if (!schema) {
+      body.innerHTML = renderStateBlock({
+        icon: 'pages',
+        title: 'Content fields for this page are coming in a later step',
+        description: 'For now you can still control whether "' + currentPage.title + '" is published or kept as a draft. Home is the first page with full field-by-field editing.',
+      }) + genericStatusFormHtml();
+      wireGenericStatusForm();
+      return;
+    }
+
+    let html = '';
+    schema.forEach(function (section) {
+      html += '<div class="fieldset"><h3>' + escapeHtml(section.section) + '</h3>';
+
+      // group fields that share a "group" label (e.g. the 3 why-cards)
+      const seenGroups = {};
+      section.fields.forEach(function (f) {
+        if (f.group) {
+          if (seenGroups[f.group]) return; // rendered as part of the group already
+          seenGroups[f.group] = true;
+          const groupFields = section.fields.filter(function (gf) { return gf.group === f.group; });
+          html += '<div class="card-group"><div style="font-size:12px;font-family:var(--font-mono);color:var(--text-dim);margin-bottom:10px;">' + escapeHtml(f.group) + '</div>';
+          groupFields.forEach(function (gf) { html += renderField(gf); });
+          html += '</div>';
+        } else {
+          html += renderField(f);
+        }
+      });
+
+      html += '</div>';
+    });
+
+    html += `
+      <div class="sticky-actions">
+        <div class="status-toggle">
+          <label style="font-size:13px;font-weight:600;color:var(--text-soft);">Status</label>
+          <select id="statusSelect" class="ac-field" style="width:auto;padding:8px 12px;">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <a href="../index.html" target="_blank" class="btn btn-secondary">Preview live page ↗</a>
+          <button class="btn btn-primary" id="saveBtn">Save changes</button>
+        </div>
+      </div>
+    `;
+
+    body.innerHTML = html;
+    document.getElementById('statusSelect').value = currentPage.status;
+
+    // Populate field values
+    schema.forEach(function (section) {
+      section.fields.forEach(function (f) {
+        const el = document.getElementById('field-' + cssId(f.path));
+        if (!el) return;
+        const value = getPath(workingContent, f.path);
+        if (f.type === 'lines') {
+          el.value = Array.isArray(value) ? value.join('\n') : '';
+        } else {
+          el.value = value || '';
+        }
+      });
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', function () { saveHomeLikePage(schema); });
+  }
+
+  function renderField(f) {
+    const id = 'field-' + cssId(f.path);
+    if (f.type === 'textarea') {
+      return '<div class="ac-field"><label for="' + id + '">' + escapeHtml(f.label) + '</label><textarea id="' + id + '" rows="3"></textarea></div>';
+    }
+    if (f.type === 'lines') {
+      return '<div class="ac-field"><label for="' + id + '">' + escapeHtml(f.label) + '</label><textarea id="' + id + '" rows="4"></textarea></div>';
+    }
+    return '<div class="ac-field"><label for="' + id + '">' + escapeHtml(f.label) + '</label><input type="text" id="' + id + '"></div>';
+  }
+
+  function cssId(path) {
+    return path.replace(/\./g, '-');
+  }
+
+  async function saveHomeLikePage(schema) {
+    const btn = document.getElementById('saveBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    // Read every field back into workingContent
+    schema.forEach(function (section) {
+      section.fields.forEach(function (f) {
+        const el = document.getElementById('field-' + cssId(f.path));
+        if (!el) return;
+        if (f.type === 'lines') {
+          setPath(workingContent, f.path, el.value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean));
+        } else {
+          setPath(workingContent, f.path, el.value);
+        }
+      });
+    });
+
+    const newStatus = document.getElementById('statusSelect').value;
+
+    try {
+      const { data, error } = await adminSupabase
+        .from('pages')
+        .update({ content: workingContent, status: newStatus })
+        .eq('id', currentPage.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      currentPage = data;
+      updateStatusBadge(data.status);
+      showToast({ type: 'success', message: 'Page saved. Changes are live if published.' });
+    } catch (err) {
+      showToast({ type: 'error', message: 'Save failed: ' + (err && err.message ? err.message : 'unknown error') });
+    } finally {
+      btn.textContent = 'Save changes';
+      btn.disabled = false;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Generic fallback editor for pages without a field schema yet
+  // ---------------------------------------------------------------------
+  function genericStatusFormHtml() {
+    return `
+      <div class="fieldset" style="margin-top:16px;">
+        <h3>Status</h3>
+        <div class="ac-field" style="max-width:220px;">
+          <select id="genericStatusSelect">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="genericSaveBtn">Save status</button>
+      </div>
+    `;
+  }
+
+  function wireGenericStatusForm() {
+    document.getElementById('genericStatusSelect').value = currentPage.status;
+    document.getElementById('genericSaveBtn').addEventListener('click', async function () {
+      const btn = this;
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+      try {
+        const newStatus = document.getElementById('genericStatusSelect').value;
+        const { data, error } = await adminSupabase
+          .from('pages')
+          .update({ status: newStatus })
+          .eq('id', currentPage.id)
+          .select()
+          .single();
+        if (error) throw error;
+        currentPage = data;
+        updateStatusBadge(data.status);
+        showToast({ type: 'success', message: 'Status updated.' });
+      } catch (err) {
+        showToast({ type: 'error', message: 'Save failed: ' + (err && err.message ? err.message : 'unknown error') });
+      } finally {
+        btn.textContent = 'Save status';
+        btn.disabled = false;
+      }
+    });
+  }
+</script>
+</body>
+</html>
