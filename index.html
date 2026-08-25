@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auwion — Business Central, Zoho Books & Odoo Implementation</title>
+<meta name="description" content="Auwion implements and supports Business Central, Zoho Books, and Odoo, plus the web apps and sites that extend them. Expert implementation, fast delivery, honest pricing.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="256x256" href="favicon-256.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FC;
+    --bg-2:#FFFFFF;
+    --bg-3:#EDF1F9;
+    --card:rgba(16,20,43,0.04);
+    --card-strong:rgba(16,20,43,0.07);
+    --border:rgba(16,20,43,0.12);
+    --border-soft:rgba(16,20,43,0.07);
+    --pink:#3B82F6;
+    --pink-soft:#7CB4FA;
+    --teal:#0FA898;
+    --teal-soft:#45C9BB;
+    --text:#10142B;
+    --text-soft:#4B5170;
+    --text-dim:#848AA8;
+    --grad: linear-gradient(90deg, var(--pink), var(--teal));
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --maxw:1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;position:relative;z-index:2;}
+  ::selection{background:var(--pink);color:var(--bg);}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:3px;}
+
+  /* ---------- Nav ---------- */
+  header.site{
+    position:sticky;top:0;z-index:50;
+    background:rgba(246,248,252,0.82);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;}
+  .wordmark{
+    font-family:var(--font-display);font-weight:700;font-size:18px;
+    letter-spacing:0.01em;text-decoration:none;color:var(--text);
+  }
+  .wordmark span{
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  nav.links{display:none;align-items:center;gap:32px;}
+  @media(min-width:860px){nav.links{display:flex;}}
+  nav.links a{text-decoration:none;font-size:14px;color:var(--text-soft);transition:color .15s ease;}
+  nav.links a:hover{color:var(--text);}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-body);font-size:14px;font-weight:600;
+    padding:11px 22px;border-radius:100px;text-decoration:none;cursor:pointer;
+    border:1px solid transparent;transition:transform .15s ease, opacity .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--grad);color:#0A0820;}
+  .btn-primary:hover{opacity:0.9;}
+  .btn-ghost{border-color:var(--border);color:var(--text);}
+  .btn-ghost:hover{background:var(--card-strong);border-color:var(--teal);}
+  .btn-dark{border-color:rgba(10,8,32,0.5);background:rgba(10,8,32,0.15);color:#0A0820;}
+  .btn-dark:hover{background:rgba(10,8,32,0.28);}
+
+  .nav-cta{display:none;}
+  @media(min-width:860px){.nav-cta{display:inline-flex;}}
+  .menu-toggle{
+    display:inline-flex;background:none;border:1px solid var(--border);
+    border-radius:100px;padding:8px 14px;font-family:var(--font-mono);font-size:12px;
+    letter-spacing:.08em;cursor:pointer;color:var(--text);
+  }
+  @media(min-width:860px){.menu-toggle{display:none;}}
+  [data-mobile-nav]{display:none;}
+  [data-mobile-nav].open{display:block;}
+  @media(min-width:860px){[data-mobile-nav]{display:none !important;}}
+  nav.links-mobile{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border-soft);padding:14px 0 18px;}
+  nav.links-mobile a{text-decoration:none;color:var(--text);font-size:15px;padding:10px 4px;border-bottom:1px solid var(--border-soft);}
+
+  /* ---------- reveal ---------- */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:110px 0 88px;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 700px 420px at 18% 10%, rgba(59,130,246,0.18), transparent 60%),
+      radial-gradient(ellipse 600px 500px at 85% 20%, rgba(15,168,152,0.14), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  }
+  .hero-wave{
+    position:absolute;left:0;right:0;bottom:-2px;width:100%;height:auto;z-index:1;opacity:0.85;
+  }
+  .hero-lines{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.55;}
+  .eyebrow{
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--teal-soft);display:flex;align-items:center;gap:10px;margin-bottom:22px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--teal-soft);}
+  h1.headline{
+    font-family:var(--font-display);font-weight:700;
+    font-size:clamp(36px,5.6vw,60px);line-height:1.08;letter-spacing:-0.01em;
+    margin:0 0 22px;max-width:15ch;
+  }
+  h1.headline .grad{
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.sub{font-size:18px;color:var(--text-soft);max-width:46ch;margin:0 0 34px;}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;}
+
+  /* ---------- Signature: balance card ---------- */
+  .ledger{
+    margin:72px 0 8px;border:1px solid var(--border);background:var(--card);
+    border-radius:16px;overflow:hidden;backdrop-filter:blur(6px);
+  }
+  .ledger-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding:18px 26px;border-bottom:1px solid var(--border-soft);background:rgba(255,255,255,0.02);
+  }
+  .ledger-head .label{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+  .ledger-head .no{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+  .ledger-body{display:grid;grid-template-columns:1fr;}
+  @media(min-width:760px){.ledger-body{grid-template-columns:1fr 1fr;}}
+  .ledger-col{padding:28px 26px;}
+  .ledger-col + .ledger-col{border-top:1px solid var(--border-soft);}
+  @media(min-width:760px){.ledger-col + .ledger-col{border-top:none;border-left:1px solid var(--border-soft);}}
+  .ledger-col h3{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 16px;display:flex;align-items:center;gap:8px;}
+  .ledger-col.debit h3{color:var(--pink-soft);}
+  .ledger-col.credit h3{color:var(--teal-soft);}
+  .ledger-col ul{list-style:none;margin:0;padding:0;}
+  .ledger-col li{display:flex;gap:10px;font-size:15px;color:var(--text-soft);padding:9px 0;border-bottom:1px dashed var(--border-soft);}
+  .ledger-col li:last-child{border-bottom:none;}
+  .ledger-col.debit li::before{content:"–";color:var(--pink-soft);font-family:var(--font-mono);}
+  .ledger-col.credit li::before{content:"+";color:var(--teal-soft);font-family:var(--font-mono);}
+  .ledger-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 26px;background:var(--grad);color:#0A0820;
+    font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;font-weight:500;
+  }
+  .ledger-foot .balance{display:flex;align-items:center;gap:8px;}
+
+  /* ---------- Section shell ---------- */
+  section{padding:88px 0;position:relative;}
+  .section-head{display:flex;flex-direction:column;gap:14px;margin-bottom:44px;max-width:640px;}
+  h2.section-title{
+    font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3.4vw,36px);
+    margin:0;letter-spacing:-0.01em;
+  }
+  .section-sub{color:var(--text-soft);font-size:16px;margin:0;}
+
+  /* ---------- Services ---------- */
+  .services-table{border-top:1px solid var(--border-soft);}
+  .service-row{
+    display:grid;grid-template-columns:1fr;gap:6px;padding:26px 4px;
+    border-bottom:1px solid var(--border-soft);text-decoration:none;color:var(--text);
+    transition:background .15s ease, padding-left .15s ease;
+  }
+  @media(min-width:760px){.service-row{grid-template-columns:210px 1fr 90px;align-items:center;gap:24px;}}
+  .service-row:hover{background:var(--card);padding-left:14px;}
+  .service-name{font-family:var(--font-display);font-size:21px;font-weight:600;}
+  .service-desc{color:var(--text-soft);font-size:15px;}
+  .service-arrow{font-family:var(--font-mono);font-size:13px;color:var(--teal-soft);justify-self:start;}
+  @media(min-width:760px){.service-arrow{justify-self:end;text-align:right;}}
+
+  /* ---------- Why band ---------- */
+  .why{background:var(--bg-2);}
+  .why-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:700px){.why-grid{grid-template-columns:repeat(3,1fr);}}
+  .why-card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 24px;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .why-card:hover{border-color:var(--teal);transform:translateY(-3px);}
+  .why-card .tag{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--pink-soft);
+    text-transform:uppercase;margin-bottom:14px;display:inline-block;
+  }
+  .why-card:nth-child(2) .tag{color:var(--teal-soft);}
+  .why-card:nth-child(3) .tag{color:var(--pink-soft);}
+  .why-card p{margin:0;font-size:16px;color:var(--text-soft);}
+
+  /* ---------- Articles ---------- */
+  .article-grid{display:grid;grid-template-columns:1fr;gap:22px;}
+  @media(min-width:700px){.article-grid{grid-template-columns:repeat(3,1fr);}}
+  .article-card{
+    border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);
+    text-decoration:none;color:var(--text);transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+  }
+  .article-card:hover{transform:translateY(-3px);border-color:var(--teal);box-shadow:0 16px 32px rgba(226,63,160,0.12);}
+  .article-thumb{
+    height:120px;position:relative;
+    background:
+      repeating-linear-gradient(135deg, rgba(226,63,160,0.18), rgba(226,63,160,0.18) 2px, transparent 2px, transparent 14px),
+      linear-gradient(135deg, rgba(226,63,160,0.14), rgba(47,224,196,0.14));
+    border-bottom:1px solid var(--border-soft);
+  }
+  .article-thumb::after{
+    content:attr(data-tag);position:absolute;bottom:10px;left:12px;
+    font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    background:rgba(16,20,43,0.85);color:var(--teal-soft);padding:4px 8px;border-radius:100px;
+    border:1px solid var(--border);
+  }
+  .article-body{padding:18px 18px 20px;}
+  .article-title{font-size:16px;font-weight:600;margin:0 0 6px;}
+  .article-meta{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .view-all{
+    display:inline-flex;align-items:center;gap:8px;margin-top:30px;font-size:14px;font-weight:600;
+    text-decoration:none;color:var(--teal-soft);border-bottom:1px solid var(--teal-soft);padding-bottom:2px;
+  }
+
+  /* ---------- CTA band ---------- */
+  .cta-band{
+    background:var(--grad);color:#0A0820;border-radius:20px;padding:56px 40px;text-align:center;margin:0 auto;
+  }
+  .cta-band h2{font-family:var(--font-display);font-weight:700;font-size:clamp(24px,3.2vw,32px);margin:0 0 12px;}
+  .cta-band p{margin:0 0 28px;color:rgba(10,8,32,0.75);font-size:16px;}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--border-soft);padding:60px 0 30px;background:var(--bg-2);}
+  .footer-grid{display:grid;grid-template-columns:1fr;gap:36px;margin-bottom:50px;}
+  @media(min-width:700px){.footer-grid{grid-template-columns:1.4fr 1fr 1fr 1fr;}}
+  .footer-brand .wordmark{display:inline-block;margin-bottom:14px;}
+  .footer-brand p{color:var(--text-dim);font-size:14px;max-width:32ch;margin:0;}
+  .footer-contact{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+  .footer-contact a,.footer-contact span{font-size:13px;color:var(--text-dim);text-decoration:none;}
+  .footer-contact a:hover{color:var(--teal-soft);}
+  .footer-col h4{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin:0 0 14px;}
+  .footer-col ul{list-style:none;margin:0;padding:0;}
+  .footer-col li{margin-bottom:10px;}
+  .footer-col a{text-decoration:none;font-size:14px;color:var(--text-soft);}
+  .footer-col a:hover{color:var(--teal-soft);}
+  .footer-bottom{
+    display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;padding-top:24px;
+    border-top:1px solid var(--border-soft);font-family:var(--font-mono);font-size:12px;color:var(--text-dim);
+  }
+</style>
+</head>
+<body data-cms-page="home">
+
+<header class="site">
+  <div class="wrap nav">
+    <a href="#top" class="wordmark">AUW<span>I</span>ON</a>
+    <nav class="links">
+      <a href="services.html">Services</a>
+      <a href="articles.html">Articles</a>
+      <a href="login.html">Client login</a>
+      <a href="about.html#contact">Contact</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="about.html#contact" class="btn btn-primary nav-cta">Get in touch</a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" id="menuToggle">MENU</button>
+    </div>
+  </div>
+  <div class="wrap" data-mobile-nav id="mobile-nav">
+    <nav class="links-mobile">
+      <a href="services.html">Services</a>
+      <a href="articles.html">Articles</a>
+      <a href="login.html">Client login</a>
+      <a href="about.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <svg class="hero-lines" viewBox="0 0 1120 520" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3B82F6"/>
+          <stop offset="100%" stop-color="#0FA898"/>
+        </linearGradient>
+      </defs>
+      <g stroke="url(#lineGrad)" stroke-width="1">
+        <line x1="60" y1="40" x2="60" y2="300" opacity="0.5"/>
+        <line x1="140" y1="90" x2="140" y2="360" opacity="0.4"/>
+        <line x1="230" y1="20" x2="230" y2="260" opacity="0.5"/>
+        <line x1="900" y1="30" x2="900" y2="320" opacity="0.5"/>
+        <line x1="980" y1="70" x2="980" y2="380" opacity="0.4"/>
+        <line x1="1060" y1="10" x2="1060" y2="240" opacity="0.5"/>
+      </g>
+      <g fill="#0FA898">
+        <circle cx="60" cy="40" r="3.5"/>
+        <circle cx="140" cy="90" r="3"/>
+        <circle cx="230" cy="20" r="3.5"/>
+        <circle cx="900" cy="30" r="3.5"/>
+        <circle cx="980" cy="70" r="3"/>
+        <circle cx="1060" cy="10" r="3.5"/>
+      </g>
+    </svg>
+    <svg class="hero-wave" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.30"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#waveGrad)" d="M0,120 C240,60 360,180 600,110 C840,40 960,160 1200,100 C1320,70 1400,90 1440,100 L1440,220 L0,220 Z"/>
+    </svg>
+
+    <div class="wrap">
+      <div class="eyebrow" id="cms-hero-eyebrow">Auwion — Systems built right, delivered fast</div>
+      <h1 class="headline"><span id="cms-headline-plain">Systems built right. </span><span class="grad" id="cms-headline-highlight">Delivered fast.</span></h1>
+      <p class="sub" id="cms-hero-sub">We implement and support Business Central, Zoho Books, and Odoo, and build the web apps and sites that extend them — with the expertise to get it right and the speed to get it done.</p>
+      <div class="hero-ctas">
+        <a href="services.html" class="btn btn-primary" id="cms-cta-primary">Explore services</a>
+        <a href="about.html#contact" class="btn btn-ghost" id="cms-cta-secondary">Talk to us</a>
+      </div>
+
+      <!-- Signature: balance card -->
+      <div class="ledger reveal">
+        <div class="ledger-head">
+          <span class="label" id="cms-ledger-label">The entry</span>
+          <span class="no" id="cms-ledger-no">Folio — Auwion</span>
+        </div>
+        <div class="ledger-body">
+          <div class="ledger-col debit">
+            <h3 id="cms-debit-title">What's costing you</h3>
+            <ul id="cms-debit-list">
+              <li>Manual reconciliation, every month</li>
+              <li>Systems that don't talk to each other</li>
+              <li>A migration nobody wants to touch</li>
+              <li>Support tickets with no one watching</li>
+            </ul>
+          </div>
+          <div class="ledger-col credit">
+            <h3 id="cms-credit-title">What Auwion brings</h3>
+            <ul id="cms-credit-list">
+              <li>Implementation done right the first time</li>
+              <li>Integrations that actually sync</li>
+              <li>Migrations handled end to end</li>
+              <li>A ticket queue you can watch move</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ledger-foot">
+          <span id="cms-balance-label">Debit vs. credit</span>
+          <span class="balance" id="cms-balance-text">✓ Balanced</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow" id="cms-services-eyebrow">Our services</div>
+        <h2 class="section-title" id="cms-services-title">What we do</h2>
+        <p class="section-sub" id="cms-services-sub">Four lines of work, one team. Each one connects back to the others when it needs to.</p>
+      </div>
+
+      <div class="services-table reveal">
+        <a href="business-central.html" class="service-row">
+          <span class="service-name">Business Central</span>
+          <span class="service-desc">Implementation, custom AL development, integrations, migration, and ongoing support.</span>
+          <span class="service-arrow">View →</span>
+        </a>
+        <a href="zoho-books.html" class="service-row">
+          <span class="service-name">Zoho Books</span>
+          <span class="service-desc">Implementation, support, and bookkeeping for teams running on Zoho.</span>
+          <span class="service-arrow">View →</span>
+        </a>
+        <a href="odoo.html" class="service-row">
+          <span class="service-name">Odoo</span>
+          <span class="service-desc">Implementation and support across the Odoo modules you need.</span>
+          <span class="service-arrow">View →</span>
+        </a>
+        <a href="web-development.html" class="service-row">
+          <span class="service-name">Web development</span>
+          <span class="service-desc">Web apps and sites, including the ones that connect to your ERP.</span>
+          <span class="service-arrow">View →</span>
+        </a>
+        <a href="bookkeeping.html" class="service-row">
+          <span class="service-name">Book keeping</span>
+          <span class="service-desc">Ongoing books management — works across Business Central, Zoho Books, and Odoo.</span>
+          <span class="service-arrow">View →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow" id="cms-why-eyebrow">Why Auwion</div>
+        <h2 class="section-title" id="cms-why-title">Systems people, not just software people</h2>
+        <p class="section-sub" id="cms-why-sub">One team across implementation, support, and the books — so nothing falls into the gap between vendors.</p>
+      </div>
+      <div class="why-grid reveal" id="cms-why-grid">
+        <div class="why-card">
+          <span class="tag">Cross-platform</span>
+          <p>Certified across Business Central, Zoho Books, and Odoo, so the recommendation fits your business, not our specialty.</p>
+        </div>
+        <div class="why-card">
+          <span class="tag">End to end</span>
+          <p>One team for implementation, support, and bookkeeping — instead of handing you off between vendors.</p>
+        </div>
+        <div class="why-card">
+          <span class="tag">Migrations</span>
+          <p>We plan migrations from legacy systems fully before touching your data, and stay until they're finished.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLES -->
+  <section id="articles">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow" id="cms-articles-eyebrow">From the ledger</div>
+        <h2 class="section-title" id="cms-articles-title">Notes from the field</h2>
+        <p class="section-sub" id="cms-articles-sub">Guides and updates on Business Central, Zoho Books, Odoo, and web development.</p>
+      </div>
+      <div class="article-grid reveal">
+        <a href="article-bc-migration.html" class="article-card">
+          <div class="article-thumb" data-tag="Business Central" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
+<defs><linearGradient id="gindexhtml-thumb-BusinessCentral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
+
+<rect x="20" y="40" width="50" height="50" rx="8" stroke="url(#gindexhtml-thumb-BusinessCentral)" stroke-width="4"/>
+<rect x="130" y="50" width="50" height="50" rx="8" stroke="url(#gindexhtml-thumb-BusinessCentral)" stroke-width="4"/>
+<path d="M74 62h52M108 52l18 12-18 12" stroke="url(#gindexhtml-thumb-BusinessCentral)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg></div>
+          <div class="article-body">
+            <p class="article-title">What actually changes during a BC migration</p>
+            <p class="article-meta">5 MIN READ</p>
+          </div>
+        </a>
+        <a href="article-odoo-modules.html" class="article-card">
+          <div class="article-thumb" data-tag="Odoo" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
+<defs><linearGradient id="gindexhtml-thumb-Odoo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
+
+<rect x="34" y="34" width="34" height="34" rx="6" stroke="url(#gindexhtml-thumb-Odoo)" stroke-width="4"/>
+<rect x="82" y="34" width="34" height="34" rx="6" stroke="url(#gindexhtml-thumb-Odoo)" stroke-width="4"/>
+<rect x="130" y="34" width="34" height="34" rx="6" stroke="url(#gindexhtml-thumb-Odoo)" stroke-width="4"/>
+<rect x="58" y="78" width="34" height="34" rx="6" stroke="url(#gindexhtml-thumb-Odoo)" stroke-width="4"/>
+<rect x="106" y="78" width="34" height="34" rx="6" stroke="url(#gindexhtml-thumb-Odoo)" stroke-width="4"/>
+
+</svg></div>
+          <div class="article-body">
+            <p class="article-title">Choosing the right Odoo modules to start with</p>
+            <p class="article-meta">4 MIN READ</p>
+          </div>
+        </a>
+        <a href="article-zoho-reconciliation.html" class="article-card">
+          <div class="article-thumb" data-tag="Zoho Books" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
+<defs><linearGradient id="gindexhtml-thumb-ZohoBooks" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
+
+<rect x="55" y="20" width="90" height="100" rx="8" stroke="url(#gindexhtml-thumb-ZohoBooks)" stroke-width="4"/>
+<path d="M72 44h56M72 60h56M72 76h34" stroke="url(#gindexhtml-thumb-ZohoBooks)" stroke-width="4" stroke-linecap="round"/>
+<path d="M74 96l10 10 20-22" stroke="url(#gindexhtml-thumb-ZohoBooks)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg></div>
+          <div class="article-body">
+            <p class="article-title">Zoho Books reconciliation, monthly checklist</p>
+            <p class="article-meta">6 MIN READ</p>
+          </div>
+        </a>
+      </div>
+      <a href="articles.html" class="view-all">View all articles →</a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="cta-band reveal">
+        <h2 id="cms-cta-heading">Ready to get started?</h2>
+        <p id="cms-cta-text">Tell us what you're working with — we'll help you find the right fit.</p>
+        <a href="about.html#contact" class="btn btn-dark" id="cms-cta-button">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="wordmark">AUW<span>I</span>ON</a>
+        <p>Business Central, Zoho Books, and Odoo — implemented, supported, and extended by Auwion.</p>
+        <div class="footer-contact">
+          <a href="tel:+94711222528">+94 71 122 2528</a>
+          <a href="mailto:hasith@auwion.com">hasith@auwion.com</a>
+          <span>1142/2, Wasawalatta Lane, Pannipitiya, Sri Lanka</span>
+          <a href="https://www.linkedin.com/company/auwion" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="business-central.html">Business Central</a></li>
+          <li><a href="zoho-books.html">Zoho Books</a></li>
+          <li><a href="odoo.html">Odoo</a></li>
+          <li><a href="web-development.html">Web development</a></li>
+          <li><a href="bookkeeping.html">Book keeping</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="articles.html">Articles</a></li>
+          <li><a href="login.html">Client login</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Books closed. © 2026 Auwion.</span>
+      <span><a href="privacy.html" style="color:inherit;text-decoration:none;">Privacy</a> · <a href="terms.html" style="color:inherit;text-decoration:none;">Terms</a></span>
+      <span>Pannipitiya, Sri Lanka</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var toggle = document.getElementById('menuToggle');
+  var mobileNav = document.getElementById('mobile-nav');
+  toggle.addEventListener('click', function(){
+    var isOpen = mobileNav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    toggle.textContent = isOpen ? 'CLOSE' : 'MENU';
+  });
+
+  var reveals = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.12});
+    reveals.forEach(function(el){ io.observe(el); });
+  } else {
+    reveals.forEach(function(el){ el.classList.add('in'); });
+  }
+</script>
+
+<!-- CMS content loader: fills in admin-edited text if a published version
+     exists in Supabase; otherwise the hand-written content above stands
+     unchanged. See assets/site-cms.js. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-cms.js"></script>
+
+</body>
+</html>
