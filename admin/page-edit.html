@@ -106,7 +106,110 @@
     ]},
   ];
 
-  const PAGE_SCHEMAS = { home: HOME_SCHEMA };
+  const SERVICES_OVERVIEW_SCHEMA = [
+    { section: 'Intro', fields: [
+      { path: 'eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'title', label: 'Title', type: 'text' },
+      { path: 'sub', label: 'Subtitle', type: 'textarea' },
+    ]},
+  ];
+
+  // Shared shape for Business Central / Zoho Books / Odoo / Web development
+  function serviceDetailSchema() {
+    return [
+      { section: 'Hero', fields: [
+        { path: 'eyebrow', label: 'Eyebrow', type: 'text' },
+        { path: 'headline', label: 'Headline', type: 'text' },
+        { path: 'sub', label: 'Subtitle', type: 'textarea' },
+      ]},
+      { section: 'Cross-sell to Book keeping', fields: [
+        { path: 'cross_sell.text', label: 'Prompt text', type: 'text' },
+        { path: 'cross_sell.button_label', label: 'Button label', type: 'text' },
+        { path: 'cross_sell.button_link', label: 'Button link', type: 'text' },
+      ]},
+      { section: 'Bottom CTA band', fields: [
+        { path: 'cta_band.heading', label: 'Heading', type: 'text' },
+        { path: 'cta_band.text', label: 'Text', type: 'textarea' },
+        { path: 'cta_band.button_label', label: 'Button label', type: 'text' },
+        { path: 'cta_band.button_link', label: 'Button link', type: 'text' },
+      ]},
+    ];
+  }
+
+  const BOOKKEEPING_SCHEMA = [
+    { section: 'Hero', fields: [
+      { path: 'eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'headline', label: 'Headline', type: 'text' },
+      { path: 'sub', label: 'Subtitle', type: 'textarea' },
+    ]},
+    { section: 'Platform badges', fields: [
+      { path: 'badges', label: 'Badges (one per line)', type: 'lines' },
+    ]},
+    { section: 'Info cards', fields: [
+      { path: 'info_cards.0.title', label: 'Card 1 — title', type: 'text', group: 'Card 1' },
+      { path: 'info_cards.0.text', label: 'Card 1 — text', type: 'textarea', group: 'Card 1' },
+      { path: 'info_cards.1.title', label: 'Card 2 — title', type: 'text', group: 'Card 2' },
+      { path: 'info_cards.1.text', label: 'Card 2 — text', type: 'textarea', group: 'Card 2' },
+      { path: 'info_cards.2.title', label: 'Card 3 — title', type: 'text', group: 'Card 3' },
+      { path: 'info_cards.2.text', label: 'Card 3 — text', type: 'textarea', group: 'Card 3' },
+    ]},
+    { section: 'Bottom CTA band', fields: [
+      { path: 'cta_band.heading', label: 'Heading', type: 'text' },
+      { path: 'cta_band.text', label: 'Text', type: 'textarea' },
+      { path: 'cta_band.button_label', label: 'Button label', type: 'text' },
+      { path: 'cta_band.button_link', label: 'Button link', type: 'text' },
+    ]},
+  ];
+
+  const ABOUT_SCHEMA = [
+    { section: 'Intro', fields: [
+      { path: 'eyebrow', label: 'Eyebrow', type: 'text' },
+      { path: 'headline', label: 'Headline', type: 'text' },
+    ]},
+    { section: 'Paragraphs', fields: [
+      { path: 'paragraphs.0', label: 'Paragraph 1', type: 'textarea' },
+      { path: 'paragraphs.1', label: 'Paragraph 2', type: 'textarea' },
+      { path: 'paragraphs.2', label: 'Paragraph 3', type: 'textarea' },
+    ]},
+  ];
+
+  // Shared shape for Privacy / Terms — 7 {heading, body} sections. Note:
+  // the "Contact" section on each page also carries link_text/link_href
+  // (an inline link inside its body, e.g. "...via the contact form...").
+  // Those two fields aren't exposed as separate inputs here to keep the
+  // form simple; they're preserved automatically as long as you don't
+  // delete the matching phrase from that section's body text. If the
+  // phrase is removed, the link just quietly stops appearing — it won't
+  // break anything.
+  function legalPageSchema() {
+    const sectionFields = [];
+    for (let i = 0; i < 7; i++) {
+      const group = 'Section ' + (i + 1);
+      sectionFields.push({ path: 'sections.' + i + '.heading', label: group + ' — heading', type: 'text', group: group });
+      sectionFields.push({ path: 'sections.' + i + '.body', label: group + ' — body', type: 'textarea', group: group });
+    }
+    return [
+      { section: 'Header', fields: [
+        { path: 'headline', label: 'Headline', type: 'text' },
+        { path: 'byline', label: 'Byline (e.g. "Last updated: ...")', type: 'text' },
+        { path: 'intro', label: 'Intro paragraph', type: 'textarea' },
+      ]},
+      { section: 'Sections', fields: sectionFields },
+    ];
+  }
+
+  const PAGE_SCHEMAS = {
+    home: HOME_SCHEMA,
+    services: SERVICES_OVERVIEW_SCHEMA,
+    'business-central': serviceDetailSchema(),
+    'zoho-books': serviceDetailSchema(),
+    odoo: serviceDetailSchema(),
+    'web-development': serviceDetailSchema(),
+    bookkeeping: BOOKKEEPING_SCHEMA,
+    about: ABOUT_SCHEMA,
+    privacy: legalPageSchema(),
+    terms: legalPageSchema(),
+  };
 
   // Note on scope: the Services table rows (shown on both Home and
   // Services) and the 3 article cards (shown on both Home and Articles)
