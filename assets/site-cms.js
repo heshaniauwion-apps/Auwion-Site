@@ -170,10 +170,11 @@
     website: '<rect x="14" y="24" width="92" height="66" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M14 40h92" stroke="{{grad}}" stroke-width="4"/><circle cx="26" cy="32" r="2.4" fill="{{grad}}"/><circle cx="35" cy="32" r="2.4" fill="{{grad}}"/><rect x="26" y="50" width="24" height="30" rx="3" stroke="{{grad}}" stroke-width="3"/><path d="M58 52h34M58 62h34M58 72h22" stroke="{{grad}}" stroke-width="3" stroke-linecap="round"/>',
   };
 
-  function renderServiceIcon(iconKey, uniqueId) {
+  function renderServiceIcon(iconKey, uniqueId, size) {
+    size = size || 72;
     const gradId = 'gsvc-' + uniqueId;
     const paths = (SERVICE_ICONS[iconKey] || '').split('{{grad}}').join('url(#' + gradId + ')');
-    return '<svg viewBox="0 0 120 120" width="72" height="72" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">' +
+    return '<svg viewBox="0 0 120 120" width="' + size + '" height="' + size + '" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;flex-shrink:0;">' +
       '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>' +
       paths + '</svg>';
   }
@@ -238,15 +239,23 @@
     try {
       const { data, error } = await cmsClient
         .from('services')
-        .select('slug, name, short_description')
+        .select('slug, name, short_description, icon_key')
         .eq('status', 'published')
         .order('display_order', { ascending: true });
 
       if (error || !data || data.length === 0) return; // keep built-in rows as-is
 
-      tableEl.innerHTML = data.map(function (s) {
+      tableEl.innerHTML = data.map(function (s, i) {
+        const icon = s.icon_key ? renderServiceIcon(s.icon_key, 'row-' + i, 26) : '';
+        // Icon is nested INSIDE the first grid cell (alongside the name),
+        // not added as a 4th child — .service-row's grid-template-columns
+        // expects exactly 3 direct children (name / desc / arrow), so
+        // adding a sibling would shift every column and break the layout.
         return '<a href="' + escapeHtmlLite(s.slug) + '.html" class="service-row">' +
+          '<span style="display:flex;align-items:center;gap:12px;">' +
+          (icon ? '<span style="display:inline-flex;flex-shrink:0;">' + icon + '</span>' : '') +
           '<span class="service-name">' + escapeHtmlLite(s.name) + '</span>' +
+          '</span>' +
           '<span class="service-desc">' + escapeHtmlLite(s.short_description) + '</span>' +
           '<span class="service-arrow">View →</span></a>';
       }).join('');
