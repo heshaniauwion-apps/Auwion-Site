@@ -239,7 +239,7 @@
     try {
       const { data, error } = await cmsClient
         .from('services')
-        .select('slug, name, short_description, icon_key')
+        .select('slug, name, short_description, icon_key, link_url')
         .eq('status', 'published')
         .order('display_order', { ascending: true });
 
@@ -247,11 +247,12 @@
 
       tableEl.innerHTML = data.map(function (s, i) {
         const icon = s.icon_key ? renderServiceIcon(s.icon_key, 'row-' + i, 26) : '';
+        const href = s.link_url || (s.slug + '.html');
         // Icon is nested INSIDE the first grid cell (alongside the name),
         // not added as a 4th child — .service-row's grid-template-columns
         // expects exactly 3 direct children (name / desc / arrow), so
         // adding a sibling would shift every column and break the layout.
-        return '<a href="' + escapeHtmlLite(s.slug) + '.html" class="service-row">' +
+        return '<a href="' + escapeHtmlLite(href) + '" class="service-row">' +
           '<span style="display:flex;align-items:center;gap:12px;">' +
           (icon ? '<span style="display:inline-flex;flex-shrink:0;">' + icon + '</span>' : '') +
           '<span class="service-name">' + escapeHtmlLite(s.name) + '</span>' +
