@@ -76,6 +76,29 @@
   const HEADING_SIZE_MAP = { sm: '20px', md: '28px', lg: '36px', xl: '48px' };
   const PARA_SIZE_MAP = { sm: '14px', md: '16px', lg: '18px', xl: '20px' };
   const SPACER_MAP = { sm: '16px', md: '32px', lg: '56px', xl: '96px' };
+  const SECTION_BG_MAP = { none: 'transparent', surface: '#ffffff', dark: 'var(--text)', gradient: 'var(--grad)' };
+  const SECTION_PADDING_MAP = { sm: '24px', md: '48px', lg: '72px', xl: '100px' };
+
+  // Dispatches to the right renderer for any block, including container
+  // types. Used both at the top level and inside containers, so a
+  // section's children (or, in principle, a column's children) can
+  // themselves be any block type — the data model supports arbitrary
+  // nesting even though today's admin UI only builds a couple of levels.
+  function renderAnyBlock(b, childrenByBlock) {
+    if (b.type === 'columns') return renderColumnsBlock(b, childrenByBlock);
+    if (b.type === 'section') return renderSectionBlock(b, childrenByBlock);
+    return renderBlock(b);
+  }
+
+  function renderSectionBlock(block, childrenByBlock) {
+    const p = block.props || {};
+    const bg = SECTION_BG_MAP[p.background] || SECTION_BG_MAP.none;
+    const pad = SECTION_PADDING_MAP[p.padding] || SECTION_PADDING_MAP.md;
+    const children = childrenByBlock[block.id] || [];
+    const inner = children.map(function (c) { return renderAnyBlock(c, childrenByBlock); }).join('');
+    const radius = (p.background && p.background !== 'none') ? 'border-radius:16px;' : '';
+    return '<div style="background:' + bg + ';padding:' + pad + ';margin-bottom:16px;' + radius + '">' + inner + '</div>';
+  }
 
   function esc(str) {
     return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -130,7 +153,7 @@
     const colHtml = [];
     for (let i = 0; i < numCols; i++) {
       const colChildren = children.filter(function (c) { return c.column_index === i; });
-      colHtml.push('<div>' + colChildren.map(renderBlock).join('') + '</div>');
+      colHtml.push('<div>' + colChildren.map(function (c) { return renderAnyBlock(c, childrenByBlock); }).join('') + '</div>');
     }
     return '<div class="' + colClass + '" style="margin-bottom:16px;">' + colHtml.join('') + '</div>';
   }
@@ -175,7 +198,7 @@
       });
 
       const html = topLevel.map(function (b) {
-        return b.type === 'columns' ? renderColumnsBlock(b, childrenByBlock) : renderBlock(b);
+        return renderAnyBlock(b, childrenByBlock);
       }).join('');
 
       document.getElementById('loadingState').style.display = 'none';
