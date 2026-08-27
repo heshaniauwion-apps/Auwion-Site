@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Service — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+<style>
+  .fieldset{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+  .fieldset h3{font-family:var(--font-display);font-size:15px;margin:0 0 16px;}
+  .block-card{border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;}
+  .block-card:last-child{margin-bottom:0;}
+  .block-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .block-card-head .anchor{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .field-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+  @media(max-width:700px){.field-row{grid-template-columns:1fr;}}
+  .sticky-actions{
+    position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1 id="editorTitle">Edit service</h1>
+      <p id="editorSlugLine" style="font-family:var(--font-mono);"></p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge" id="statusBadge" style="display:none;"></span>
+      <a href="services.html" class="btn btn-secondary btn-sm">← Back to Services</a>
+    </div>
+  </div>
+
+  <div id="editorError"></div>
+  <div id="editorBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  // The 10 icons currently available (matching assets/site-cms.js's
+  // SERVICE_ICONS library exactly). Adding new icon designs isn't
+  // supported from this screen yet — only picking among existing ones.
+  const ICON_OPTIONS = ['implementation', 'al-dev', 'shopify', 'migration', 'integrations', 'support', 'training', 'bookkeeping', 'webapp', 'website'];
+
+  let currentService = null;
+  let currentBlocks = [];
+  let isNewService = false;
+
+  (async function () {
+    const admin = await initAdminShell('services');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) {
+      isNewService = true;
+      currentService = { id: null, name: '', slug: '', short_description: '', icon_key: ICON_OPTIONS[0], display_order: 99, status: 'draft' };
+      currentBlocks = [];
+      document.getElementById('editorTitle').textContent = 'Add service';
+      document.getElementById('editorSlugLine').textContent = 'Creating a new service';
+      renderEditor();
+      return;
+    }
+    await loadService(slug);
+  })();
+
+  async function loadService(slug) {
+    try {
+      const { data: service, error: serviceError } = await adminSupabase
+        .from('services')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (serviceError) throw serviceError;
+      if (!service) {
+        document.getElementById('editorError').innerHTML = renderErrorBanner('Service not found: ' + slug);
+        return;
+      }
+
+      const { data: blocks, error: blocksError } = await adminSupabase
+        .from('service_blocks')
+        .select('*')
+        .eq('service_id', service.id)
+        .order('display_order', { ascending: true });
+
+      if (blocksError) throw blocksError;
+
+      currentService = service;
+      currentBlocks = blocks || [];
+
+      document.getElementById('editorTitle').textContent = service.name;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + service.slug;
+      updateStatusBadge(service.status);
+
+      renderEditor();
+    } catch (err) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('Could not load service: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+
+  function updateStatusBadge(status) {
+    const el = document.getElementById('statusBadge');
+    el.style.display = 'inline-block';
+    el.textContent = status;
+    el.className = 'badge ' + (status === 'published' ? 'badge-published' : 'badge-draft');
+  }
+
+  function renderEditor() {
+    const body = document.getElementById('editorBody');
+
+    let html = `
+      <div class="fieldset">
+        <h3>Service details</h3>
+        <div class="field-row">
+          <div class="ac-field">
+            <label for="serviceName">Name (shown in the services table on Home &amp; Services)</label>
+            <input type="text" id="serviceName">
+          </div>
+          <div class="ac-field">
+            <label for="serviceSlug">URL / slug (page becomes <code>&lt;slug&gt;.html</code>)</label>
+            <input type="text" id="serviceSlug" placeholder="e.g. business-central">
+          </div>
+        </div>
+        <div class="ac-field">
+          <label for="serviceDesc">Short description</label>
+          <textarea id="serviceDesc" rows="2"></textarea>
+        </div>
+        <div class="ac-field">
+          <label for="serviceLinkUrl">Link override (optional — leave blank to link to <code>&lt;slug&gt;.html</code> as normal; set this if this entry should link to a different existing page, like <code>web-development.html</code>)</label>
+          <input type="text" id="serviceLinkUrl" placeholder="e.g. web-development.html">
+        </div>
+        <div class="field-row">
+          <div class="ac-field">
+            <label for="serviceIcon">Icon (shown next to the name in the table row)</label>
+            <select id="serviceIcon">
+              ${ICON_OPTIONS.map(function (k) { return '<option value="' + k + '">' + k + '</option>'; }).join('')}
+            </select>
+          </div>
+          <div class="ac-field">
+            <label for="serviceOrder">Display order (lower numbers show first)</label>
+            <input type="number" id="serviceOrder" min="1" step="1">
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (!isNewService) {
+      if (currentBlocks.length > 0) {
+        html += '<div class="fieldset"><h3>Sub-service blocks</h3>';
+        currentBlocks.forEach(function (b, i) {
+          html += `
+            <div class="block-card">
+              <div class="block-card-head">
+                <strong>Block ${i + 1}</strong>
+                <span class="anchor">#${escapeHtml(b.anchor_id || '')}</span>
+              </div>
+              <div class="ac-field">
+                <label for="blockTitle-${i}">Title</label>
+                <input type="text" id="blockTitle-${i}">
+              </div>
+              <div class="ac-field">
+                <label for="blockDesc-${i}">Description</label>
+                <textarea id="blockDesc-${i}" rows="2"></textarea>
+              </div>
+              <div class="ac-field" style="max-width:220px;">
+                <label for="blockIcon-${i}">Icon</label>
+                <select id="blockIcon-${i}">
+                  ${ICON_OPTIONS.map(function (k) { return '<option value="' + k + '">' + k + '</option>'; }).join('')}
+                </select>
+              </div>
+            </div>
+          `;
+        });
+        html += '<p style="font-size:12px;color:var(--text-dim);margin-top:4px;">Adding or removing blocks, and reordering them, isn\'t supported from this screen yet — only editing existing ones.</p></div>';
+      } else {
+        html += renderStateBlock({
+          icon: 'services',
+          title: 'No sub-service blocks',
+          description: 'This service doesn\'t have sub-blocks — either it uses its own page content instead (like Book Keeping), or none have been added yet.',
+        });
+      }
+    }
+
+    const previewHref = isNewService ? '#' : ('../' + escapeHtml(currentService.link_url || (currentService.slug + '.html')));
+    const previewAttrs = isNewService ? ' onclick="return false;" style="opacity:.5;cursor:not-allowed;"' : ' target="_blank"';
+
+    html += `
+      <div class="sticky-actions">
+        <div class="status-toggle">
+          <label style="font-size:13px;font-weight:600;color:var(--text-soft);">Status</label>
+          <select id="statusSelect" class="ac-field" style="width:auto;padding:8px 12px;">
+            <option value="draft">Draft (disabled — hidden from the site)</option>
+            <option value="published">Published (enabled — visible on the site)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          ${isNewService ? '' : '<button class="btn btn-danger" id="deleteBtn">Delete service</button>'}
+          <a href="${previewHref}"${previewAttrs} class="btn btn-secondary">Preview live page ↗</a>
+          <button class="btn btn-primary" id="saveBtn">${isNewService ? 'Create service' : 'Save changes'}</button>
+        </div>
+      </div>
+    `;
+
+    body.innerHTML = html;
+
+    document.getElementById('serviceName').value = currentService.name || '';
+    document.getElementById('serviceSlug').value = currentService.slug || '';
+    document.getElementById('serviceDesc').value = currentService.short_description || '';
+    document.getElementById('serviceLinkUrl').value = currentService.link_url || '';
+    document.getElementById('serviceIcon').value = currentService.icon_key || ICON_OPTIONS[0];
+    document.getElementById('serviceOrder').value = currentService.display_order || 99;
+    document.getElementById('statusSelect').value = currentService.status;
+
+    currentBlocks.forEach(function (b, i) {
+      document.getElementById('blockTitle-' + i).value = b.title || '';
+      document.getElementById('blockDesc-' + i).value = b.description || '';
+      document.getElementById('blockIcon-' + i).value = b.icon_key || ICON_OPTIONS[0];
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', saveService);
+    if (!isNewService) {
+      document.getElementById('deleteBtn').addEventListener('click', deleteService);
+    }
+  }
+
+  async function saveService() {
+    const btn = document.getElementById('saveBtn');
+    const nameVal = document.getElementById('serviceName').value.trim();
+    const slugVal = document.getElementById('serviceSlug').value.trim();
+
+    if (!nameVal || !slugVal) {
+      showToast({ type: 'error', message: 'Name and URL/slug are both required.' });
+      return;
+    }
+    if (!/^[a-z0-9-]+$/.test(slugVal)) {
+      showToast({ type: 'error', message: 'Slug can only contain lowercase letters, numbers, and hyphens.' });
+      return;
+    }
+
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    const payload = {
+      name: nameVal,
+      slug: slugVal,
+      short_description: document.getElementById('serviceDesc').value,
+      link_url: document.getElementById('serviceLinkUrl').value.trim() || null,
+      icon_key: document.getElementById('serviceIcon').value,
+      display_order: parseInt(document.getElementById('serviceOrder').value, 10) || 99,
+      status: document.getElementById('statusSelect').value,
+    };
+
+    try {
+      if (isNewService) {
+        const { data: created, error: createError } = await adminSupabase
+          .from('services')
+          .insert(payload)
+          .select()
+          .single();
+        if (createError) throw createError;
+
+        showToast({ type: 'success', message: 'Service created.' });
+        setTimeout(function () { window.location.href = 'service-edit.html?slug=' + encodeURIComponent(created.slug); }, 600);
+        return;
+      }
+
+      const { data: updatedService, error: serviceError } = await adminSupabase
+        .from('services')
+        .update(payload)
+        .eq('id', currentService.id)
+        .select()
+        .single();
+
+      if (serviceError) throw serviceError;
+      currentService = updatedService;
+
+      // Save each block individually — small number of rows (2-7), so
+      // sequential updates keep this simple and give a clear error if
+      // one specific block fails, rather than an all-or-nothing batch.
+      for (let i = 0; i < currentBlocks.length; i++) {
+        const { data: updatedBlock, error: blockError } = await adminSupabase
+          .from('service_blocks')
+          .update({
+            title: document.getElementById('blockTitle-' + i).value,
+            description: document.getElementById('blockDesc-' + i).value,
+            icon_key: document.getElementById('blockIcon-' + i).value,
+          })
+          .eq('id', currentBlocks[i].id)
+          .select()
+          .single();
+
+        if (blockError) throw blockError;
+        currentBlocks[i] = updatedBlock;
+      }
+
+      updateStatusBadge(currentService.status);
+      document.getElementById('editorTitle').textContent = currentService.name;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + currentService.slug;
+      showToast({ type: 'success', message: 'Service saved. Changes are live if published.' });
+    } catch (err) {
+      const msg = (err && err.message) || 'unknown error';
+      const friendly = msg.indexOf('duplicate key') !== -1
+        ? 'That URL/slug is already used by another service. Choose a different one.'
+        : msg;
+      showToast({ type: 'error', message: 'Save failed: ' + friendly });
+    } finally {
+      btn.textContent = isNewService ? 'Create service' : 'Save changes';
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteService() {
+    const confirmed = await confirmDialog({
+      title: 'Delete "' + currentService.name + '"?',
+      message: 'This removes it from the Services table on Home and Services, and deletes its sub-service blocks. The underlying page file (' + currentService.slug + '.html) is NOT deleted — it will just show its own built-in content again instead of admin-managed content, and won\'t be listed anywhere.',
+      confirmLabel: 'Delete service',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      const { error } = await adminSupabase.from('services').delete().eq('id', currentService.id);
+      if (error) throw error;
+      showToast({ type: 'success', message: 'Service deleted.' });
+      setTimeout(function () { window.location.href = 'services.html'; }, 600);
+    } catch (err) {
+      showToast({ type: 'error', message: 'Delete failed: ' + (err && err.message ? err.message : 'unknown error') });
+    }
+  }
+</script>
+</body>
+</html>
