@@ -40,6 +40,17 @@
     position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);
     padding:14px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
   }
+  .builder-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  @media(max-width:1000px){.builder-split{grid-template-columns:1fr;}}
+  .builder-preview-col{
+    position:sticky;top:20px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .builder-preview-header{
+    padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:11px;
+    color:var(--text-dim);display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;letter-spacing:.04em;
+  }
+  #previewFrame{width:100%;height:75vh;border:none;display:block;background:#fff;}
 </style>
 </head>
 <body>
@@ -61,46 +72,58 @@
 
   <div id="editorError"></div>
 
-  <div class="fieldset">
-    <h3>Page details</h3>
-    <div class="field-row">
-      <div class="ac-field">
-        <label for="pageTitle">Title (admin label)</label>
-        <input type="text" id="pageTitle">
+  <div class="builder-split">
+    <div class="builder-editor-col">
+      <div class="fieldset">
+        <h3>Page details</h3>
+        <div class="field-row">
+          <div class="ac-field">
+            <label for="pageTitle">Title (admin label)</label>
+            <input type="text" id="pageTitle">
+          </div>
+          <div class="ac-field">
+            <label for="pageSlug">Slug (URL becomes <code>page.html?slug=…</code>)</label>
+            <input type="text" id="pageSlug" placeholder="e.g. spring-promo">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="ac-field">
+            <label for="pageSeoTitle">SEO title (optional)</label>
+            <input type="text" id="pageSeoTitle">
+          </div>
+          <div class="ac-field">
+            <label for="pageSeoDesc">SEO description (optional)</label>
+            <input type="text" id="pageSeoDesc">
+          </div>
+        </div>
       </div>
-      <div class="ac-field">
-        <label for="pageSlug">Slug (URL becomes <code>page.html?slug=…</code>)</label>
-        <input type="text" id="pageSlug" placeholder="e.g. spring-promo">
+
+      <div class="fieldset">
+        <h3>Add a block</h3>
+        <div class="palette">
+          <button data-type="heading">+ Heading</button>
+          <button data-type="paragraph">+ Paragraph</button>
+          <button data-type="image">+ Image</button>
+          <button data-type="button">+ Button</button>
+          <button data-type="spacer">+ Spacer</button>
+          <button data-type="section">+ Section</button>
+          <button data-type="columns">+ Columns</button>
+          <button data-type="card_grid">+ Card grid</button>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim);margin:0;">Drag a block by its ⠿ handle to reorder. The preview on the right updates as you type.</p>
       </div>
+
+      <div id="blocksList"></div>
     </div>
-    <div class="field-row">
-      <div class="ac-field">
-        <label for="pageSeoTitle">SEO title (optional)</label>
-        <input type="text" id="pageSeoTitle">
+
+    <div class="builder-preview-col">
+      <div class="builder-preview-header">
+        <span>Live preview</span>
+        <a href="#" id="previewLink" target="_blank" style="color:var(--text-dim);text-decoration:underline;">Open full page ↗</a>
       </div>
-      <div class="ac-field">
-        <label for="pageSeoDesc">SEO description (optional)</label>
-        <input type="text" id="pageSeoDesc">
-      </div>
+      <iframe id="previewFrame" title="Live preview"></iframe>
     </div>
   </div>
-
-  <div class="fieldset">
-    <h3>Add a block</h3>
-    <div class="palette">
-      <button data-type="heading">+ Heading</button>
-      <button data-type="paragraph">+ Paragraph</button>
-      <button data-type="image">+ Image</button>
-      <button data-type="button">+ Button</button>
-      <button data-type="spacer">+ Spacer</button>
-      <button data-type="section">+ Section</button>
-      <button data-type="columns">+ Columns</button>
-      <button data-type="card_grid">+ Card grid</button>
-    </div>
-    <p style="font-size:12px;color:var(--text-dim);margin:0;">Drag a block by its ⠿ handle to reorder. Click "Preview" below to see the real rendered page.</p>
-  </div>
-
-  <div id="blocksList"></div>
 
   <div class="sticky-actions">
     <div class="status-toggle">
@@ -112,7 +135,7 @@
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-danger" id="deletePageBtn" style="display:none;">Delete page</button>
-      <a href="#" id="previewLink" target="_blank" class="btn btn-secondary">Preview ↗</a>
+      <a href="#" id="previewLinkBottom" target="_blank" class="btn btn-secondary">Preview ↗</a>
       <button class="btn btn-primary" id="saveBtn">Save changes</button>
     </div>
   </div>
@@ -121,6 +144,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/admin-client.js"></script>
 <script src="assets/admin-ui.js"></script>
+<script src="../assets/builder-render.js"></script>
 <script>
   let currentPage = null;
   let isNewPage = false;
@@ -203,9 +227,12 @@
 
   function updatePreviewLink() {
     const slug = document.getElementById('pageSlug').value.trim();
-    const link = document.getElementById('previewLink');
-    if (slug) { link.href = '../page.html?slug=' + encodeURIComponent(slug); link.style.opacity = '1'; link.style.pointerEvents = 'auto'; }
-    else { link.href = '#'; link.style.opacity = '.5'; link.style.pointerEvents = 'none'; }
+    const links = [document.getElementById('previewLink'), document.getElementById('previewLinkBottom')];
+    links.forEach(function (link) {
+      if (!link) return;
+      if (slug) { link.href = '../page.html?slug=' + encodeURIComponent(slug); link.style.opacity = '1'; link.style.pointerEvents = 'auto'; }
+      else { link.href = '#'; link.style.opacity = '.5'; link.style.pointerEvents = 'none'; }
+    });
   }
 
   function defaultProps(type) {
@@ -276,12 +303,70 @@
     const el = document.getElementById('blocksList');
     if (blocks.length === 0) {
       el.innerHTML = renderStateBlock({ icon: 'pages', title: 'No blocks yet', description: 'Use the buttons above to add your first block.' });
+      updatePreview();
       return;
     }
     el.innerHTML = blocks.map(function (b, i) { return renderBlockCard(b, i); }).join('');
     blocks.forEach(function (b, i) { bindBlockFields(b, i); });
     wireDragHandlers();
+    updatePreview();
   }
+
+  // ---- Live preview ----
+  // Converts the in-memory `blocks` (which nest a .children array inside
+  // columns/section blocks) into the flat { topLevel, childrenByBlock }
+  // shape that the shared renderBuilderPageHtml() expects — the exact
+  // same function the real page.html uses, so the preview can't drift
+  // out of sync with what visitors actually see.
+  function blocksToRenderFormat() {
+    const topLevel = blocks.map(function (b) { return { id: b.id, type: b.type, props: b.props }; });
+    const childrenByBlock = {};
+    blocks.forEach(function (b) {
+      if (Array.isArray(b.children)) {
+        childrenByBlock[b.id] = b.children.map(function (c) {
+          return { id: c.id, type: c.type, props: c.props, column_index: (c.column_index === undefined ? null : c.column_index) };
+        });
+      }
+    });
+    return { topLevel: topLevel, childrenByBlock: childrenByBlock };
+  }
+
+  let previewDebounceTimer = null;
+  function schedulePreviewUpdate() {
+    clearTimeout(previewDebounceTimer);
+    previewDebounceTimer = setTimeout(updatePreview, 150);
+  }
+
+  function updatePreview() {
+    const iframe = document.getElementById('previewFrame');
+    if (!iframe || typeof renderBuilderPageHtml !== 'function') return;
+    const { topLevel, childrenByBlock } = blocksToRenderFormat();
+    const html = renderBuilderPageHtml(topLevel, childrenByBlock);
+    iframe.srcdoc =
+      '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+      '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">' +
+      '<style>' + BUILDER_PREVIEW_CSS + '</style></head><body>' + html + '</body></html>';
+  }
+
+  // Event delegation: any input/change inside the block list re-reads
+  // that one block's fields and refreshes the preview — this is what
+  // makes the preview feel "live" instead of only updating on Save.
+  document.getElementById('blocksList').addEventListener('input', function (e) {
+    const match = e.target.id.match(/^b(\d+)-/);
+    if (!match) return;
+    readBlockFormIntoProps(parseInt(match[1], 10));
+    schedulePreviewUpdate();
+  });
+  document.getElementById('blocksList').addEventListener('change', function (e) {
+    const match = e.target.id.match(/^b(\d+)-/);
+    if (!match) return;
+    const idx = parseInt(match[1], 10);
+    readBlockFormIntoProps(idx);
+    // Changing a columns block's column count, or a section's settings,
+    // needs its own sub-editor re-rendered, not just the preview.
+    if (e.target.id.endsWith('-count') && blocks[idx].type === 'columns') renderColumnBoxes(blocks[idx], idx);
+    updatePreview();
+  });
 
   function fieldRow(labelText, inputHtml) {
     return '<div class="ac-field"><label>' + escapeHtml(labelText) + '</label>' + inputHtml + '</div>';
