@@ -37,6 +37,7 @@ function icon(key, size) {
 const ADMIN_NAV = [
   { key: 'dashboard',   label: 'Dashboard',    href: 'index.html',        icon: 'dashboard' },
   { key: 'pages',       label: 'Pages',        href: 'pages.html',        icon: 'pages' },
+  { key: 'page-builder',label: 'Page Builder', href: 'builder-pages.html',icon: 'pages' },
   { key: 'services',    label: 'Services',     href: 'services.html',     icon: 'services' },
   { key: 'articles',    label: 'Articles',     href: 'articles.html',     icon: 'articles' },
   { key: 'media',       label: 'Media',        href: 'media.html',        icon: 'media' },
@@ -48,7 +49,7 @@ const ADMIN_NAV = [
 ];
 
 const PAGE_TITLES = {
-  dashboard: 'Dashboard', pages: 'Pages', services: 'Services', articles: 'Articles',
+  dashboard: 'Dashboard', pages: 'Pages', 'page-builder': 'Page Builder', services: 'Services', articles: 'Articles',
   media: 'Media Library', navigation: 'Navigation', contact: 'Contact Messages',
   settings: 'Website Settings', seo: 'SEO', 'admin-users': 'Admin Users',
 };
