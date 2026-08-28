@@ -21,7 +21,7 @@
     --border:rgba(16,20,43,0.12);
     --border-soft:rgba(16,20,43,0.07);
     --pink:#15024C;
-    --pink-soft:#7CB4FA;
+    --pink-soft:#6D4AEB;
     --teal:#0FA898;
     --teal-soft:#45C9BB;
     --text:#10142B;
@@ -112,8 +112,8 @@
     padding:110px 0 88px;
     overflow:hidden;
     background:
-      radial-gradient(ellipse 700px 420px at 18% 10%, rgba(21,2,76,0.18), transparent 60%),
-      radial-gradient(ellipse 600px 500px at 85% 20%, rgba(15,168,152,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 420px at 18% 10%, rgba(21,2,76,0.32), transparent 60%),
+      radial-gradient(ellipse 600px 500px at 85% 20%, rgba(15,168,152,0.26), transparent 60%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
   }
   .hero-wave{
@@ -125,20 +125,24 @@
     color:var(--teal-soft);display:flex;align-items:center;gap:10px;margin-bottom:22px;
   }
   .eyebrow::before{content:"";width:22px;height:1px;background:var(--teal-soft);}
+  #cms-hero-eyebrow{
+    display:inline-flex;background:rgba(21,2,76,0.08);border-radius:100px;
+    padding:8px 18px;font-size:13px;
+  }
   h1.headline{
     font-family:var(--font-display);font-weight:700;
-    font-size:clamp(36px,5.6vw,60px);line-height:1.08;letter-spacing:-0.01em;
+    font-size:clamp(40px,6.2vw,68px);line-height:1.06;letter-spacing:-0.01em;
     margin:0 0 22px;max-width:15ch;
   }
   h1.headline .grad{
     background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  .hero p.sub{font-size:18px;color:var(--text-soft);max-width:46ch;margin:0 0 34px;}
+  .hero p.sub{font-size:19px;color:var(--text-soft);max-width:46ch;margin:0 0 34px;}
   .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;}
 
   /* ---------- Signature: balance card ---------- */
   .ledger{
-    margin:72px 0 8px;border:1px solid var(--border);background:var(--card);
+    margin:72px 0 8px;border:1px solid var(--border);border-top:3px solid #15024C;background:var(--card);
     border-radius:16px;overflow:hidden;backdrop-filter:blur(6px);
   }
   .ledger-head{
