@@ -420,7 +420,7 @@
 
 </style>
 </head>
-<body>
+<body data-cms-page="articles">
 
 <header class="site">
   <div class="wrap nav">
@@ -581,19 +581,22 @@
 
   // Article filtering
   var filterPills = document.querySelectorAll('#articleFilters .filter-pill');
-  var articleCards = document.querySelectorAll('#articleGrid .article-card');
   filterPills.forEach(function(pill){
     pill.addEventListener('click', function(e){
       e.preventDefault();
       filterPills.forEach(function(p){ p.classList.remove('active'); });
       pill.classList.add('active');
       var filter = pill.getAttribute('data-filter');
-      articleCards.forEach(function(card){
+      document.querySelectorAll('#articleGrid .article-card').forEach(function(card){
         var tag = card.querySelector('.article-thumb').getAttribute('data-tag');
         card.style.display = (filter === 'All' || tag === filter) ? '' : 'none';
       });
     });
   });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-cms.js"></script>
+
 </body>
 </html>

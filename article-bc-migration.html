@@ -420,7 +420,7 @@
 
 </style>
 </head>
-<body>
+<body data-cms-page="bc-migration">
 
 <header class="site">
   <div class="wrap nav">
@@ -448,11 +448,11 @@
 
 <main>
   <section style="padding-top:60px;">
-    <div class="wrap article-full">
+    <div class="wrap article-full" id="cms-article-detail">
       <div class="breadcrumb"><a href="index.html">Home</a> / <a href="articles.html">Articles</a> / Article</div>
-      <span class="tag">Business Central</span>
-      <h1>What actually changes during a BC migration</h1>
-      <div class="byline">By Auwion team · 5 min read</div>
+      <span class="tag" id="cms-article-tag">Business Central</span>
+      <h1 id="cms-article-title">What actually changes during a BC migration</h1>
+      <div class="byline" id="cms-article-byline">By Auwion team · 5 min read</div>
       <div class="hero-img" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="180" height="140" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
 <defs><linearGradient id="garticle-bc-migrationhtml-hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15024C"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
 
@@ -461,7 +461,7 @@
 <path d="M74 62h52M108 52l18 12-18 12" stroke="url(#garticle-bc-migrationhtml-hero)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 
 </svg></div>
-      <div class="body-copy">
+      <div class="body-copy" id="cms-article-body">
         <p>Migrating to Business Central is less about the software switch and more about the process changes that come with it. Here's what teams should expect going in.</p>
         <h2>Data comes over, habits don't</h2>
         <p>Your historical records move across, but the way your team enters and checks that data usually needs to change too — that's where most of the real work happens.</p>
@@ -469,8 +469,8 @@
         <p>A staged rollout, tested against real transactions before go-live, is what keeps a migration from turning into a fire drill.</p>
       </div>
       <div class="inline-cta">
-        <p>Need help with a Business Central migration?</p>
-        <a href="business-central.html" class="btn btn-ghost">See Business Central services →</a>
+        <p id="cms-article-cta-text">Need help with a Business Central migration?</p>
+        <a href="business-central.html" class="btn btn-ghost" id="cms-article-cta-button">See Business Central services →</a>
       </div>
     </div>
   </section>
@@ -544,5 +544,8 @@
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-cms.js"></script>
+
 </body>
 </html>

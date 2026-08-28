@@ -420,7 +420,7 @@
 
 </style>
 </head>
-<body>
+<body data-cms-page="zoho-reconciliation">
 
 <header class="site">
   <div class="wrap nav">
@@ -448,11 +448,11 @@
 
 <main>
   <section style="padding-top:60px;">
-    <div class="wrap article-full">
+    <div class="wrap article-full" id="cms-article-detail">
       <div class="breadcrumb"><a href="index.html">Home</a> / <a href="articles.html">Articles</a> / Article</div>
-      <span class="tag">Zoho Books</span>
-      <h1>Zoho Books reconciliation, monthly checklist</h1>
-      <div class="byline">By Auwion team · 6 min read</div>
+      <span class="tag" id="cms-article-tag">Zoho Books</span>
+      <h1 id="cms-article-title">Zoho Books reconciliation, monthly checklist</h1>
+      <div class="byline" id="cms-article-byline">By Auwion team · 6 min read</div>
       <div class="hero-img" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="180" height="140" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
 <defs><linearGradient id="garticle-zoho-reconciliationhtml-hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15024C"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
 
@@ -461,7 +461,7 @@
 <path d="M74 96l10 10 20-22" stroke="url(#garticle-zoho-reconciliationhtml-hero)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
 
 </svg></div>
-      <div class="body-copy">
+      <div class="body-copy" id="cms-article-body">
         <p>A clean monthly close in Zoho Books comes down to a short, repeatable checklist — not a scramble at month-end. Here's the version we run for clients.</p>
         <h2>Match the bank feed before you touch anything else</h2>
         <p>Clear the bank reconciliation module first. Every unmatched transaction left sitting there tends to hide the actual errors you need to catch.</p>
@@ -469,8 +469,8 @@
         <p>Auto-suggested matches are usually right — but not always. A quick scan for duplicate entries or misclassified categories before locking the period saves a much bigger cleanup later.</p>
       </div>
       <div class="inline-cta">
-        <p>Want your Zoho Books close to take less time each month?</p>
-        <a href="zoho-books.html" class="btn btn-ghost">See Zoho Books services →</a>
+        <p id="cms-article-cta-text">Want your Zoho Books close to take less time each month?</p>
+        <a href="zoho-books.html" class="btn btn-ghost" id="cms-article-cta-button">See Zoho Books services →</a>
       </div>
     </div>
   </section>
@@ -544,5 +544,8 @@
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-cms.js"></script>
+
 </body>
 </html>

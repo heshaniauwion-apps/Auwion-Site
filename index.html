@@ -202,10 +202,16 @@
   .why-grid{display:grid;grid-template-columns:1fr;gap:16px;}
   @media(min-width:700px){.why-grid{grid-template-columns:repeat(3,1fr);}}
   .why-card{
-    background:var(--card);border:1px solid var(--border);border-top:3px solid #15024C;border-radius:14px;padding:28px 24px;
-    transition:border-color .15s ease, transform .15s ease;
+    background:var(--card);border-radius:14px;padding:28px 24px;
+    transition:transform .15s ease, box-shadow .15s ease;
   }
-  .why-card:hover{border-color:var(--teal);transform:translateY(-3px);}
+  .why-card:nth-child(1){border:1.5px solid var(--teal);box-shadow:0 0 20px rgba(15,168,152,0.22);}
+  .why-card:nth-child(2){border:1.5px solid #15024C;box-shadow:0 0 20px rgba(21,2,76,0.22);}
+  .why-card:nth-child(3){border:1.5px solid var(--teal);box-shadow:0 0 20px rgba(15,168,152,0.22);}
+  .why-card:hover{transform:translateY(-3px);}
+  .why-card:nth-child(1):hover{box-shadow:0 0 28px rgba(15,168,152,0.32);}
+  .why-card:nth-child(2):hover{box-shadow:0 0 28px rgba(21,2,76,0.32);}
+  .why-card:nth-child(3):hover{box-shadow:0 0 28px rgba(15,168,152,0.32);}
   .why-card .tag{
     font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--pink-soft);
     text-transform:uppercase;margin-bottom:14px;display:inline-block;
@@ -451,7 +457,7 @@
         <h2 class="section-title" id="cms-articles-title">Notes from the field</h2>
         <p class="section-sub" id="cms-articles-sub">Guides and updates on Business Central, Zoho Books, Odoo, and web development.</p>
       </div>
-      <div class="article-grid reveal">
+      <div class="article-grid reveal" id="cms-article-grid">
         <a href="article-bc-migration.html" class="article-card">
           <div class="article-thumb" data-tag="Business Central" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 200 140" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;">
 <defs><linearGradient id="gindexhtml-thumb-BusinessCentral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15024C"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>
