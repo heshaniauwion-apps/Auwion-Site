@@ -140,6 +140,10 @@
           <label for="serviceDesc">Short description</label>
           <textarea id="serviceDesc" rows="2"></textarea>
         </div>
+        <div class="ac-field">
+          <label for="serviceLinkUrl">Link override (optional — leave blank to link to <code>&lt;slug&gt;.html</code> as normal; set this if this entry should link to a different existing page, like <code>web-development.html</code>)</label>
+          <input type="text" id="serviceLinkUrl" placeholder="e.g. web-development.html">
+        </div>
         <div class="field-row">
           <div class="ac-field">
             <label for="serviceIcon">Icon (shown next to the name in the table row)</label>
@@ -192,7 +196,7 @@
       }
     }
 
-    const previewHref = isNewService ? '#' : ('../' + escapeHtml(currentService.slug) + '.html');
+    const previewHref = isNewService ? '#' : ('../' + escapeHtml(currentService.link_url || (currentService.slug + '.html')));
     const previewAttrs = isNewService ? ' onclick="return false;" style="opacity:.5;cursor:not-allowed;"' : ' target="_blank"';
 
     html += `
@@ -217,6 +221,7 @@
     document.getElementById('serviceName').value = currentService.name || '';
     document.getElementById('serviceSlug').value = currentService.slug || '';
     document.getElementById('serviceDesc').value = currentService.short_description || '';
+    document.getElementById('serviceLinkUrl').value = currentService.link_url || '';
     document.getElementById('serviceIcon').value = currentService.icon_key || ICON_OPTIONS[0];
     document.getElementById('serviceOrder').value = currentService.display_order || 99;
     document.getElementById('statusSelect').value = currentService.status;
@@ -254,6 +259,7 @@
       name: nameVal,
       slug: slugVal,
       short_description: document.getElementById('serviceDesc').value,
+      link_url: document.getElementById('serviceLinkUrl').value.trim() || null,
       icon_key: document.getElementById('serviceIcon').value,
       display_order: parseInt(document.getElementById('serviceOrder').value, 10) || 99,
       status: document.getElementById('statusSelect').value,
