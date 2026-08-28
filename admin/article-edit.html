@@ -75,7 +75,7 @@
         <input type="text" id="artByline" placeholder="By Auwion team">
       </div>
       <div class="ac-field">
-        <label for="artIcon">Hero icon</label>
+        <label for="artIcon">Hero icon (used if no image is uploaded below)</label>
         <select id="artIcon">
           <option value="implementation">implementation</option>
           <option value="al-dev">al-dev</option>
@@ -91,6 +91,18 @@
           <option value="odoo-modules">odoo-modules</option>
           <option value="zoho-checklist">zoho-checklist</option>
         </select>
+      </div>
+    </div>
+    <div class="ac-field">
+      <label for="artHeroImageUrl">Hero image (optional — overrides the icon above if set)</label>
+      <input type="text" id="artHeroImageUrl" placeholder="https://… or upload below">
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+        <input type="file" id="artHeroImageFile" accept="image/png,image/jpeg,image/webp,image/gif" style="font-size:12px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="uploadHeroImage()">Upload</button>
+        <span id="heroImageUploadStatus" style="font-size:12px;color:var(--text-dim);"></span>
+      </div>
+      <div id="heroImagePreviewWrap" style="margin-top:10px;display:none;">
+        <img id="heroImagePreview" style="max-width:280px;border-radius:8px;border:1px solid var(--border);" alt="Hero image preview">
       </div>
     </div>
     <div class="ac-field">
@@ -153,6 +165,7 @@
   let currentArticle = null;
   let isNewArticle = false;
   let sections = []; // [{heading, body}]
+  let currentAdmin = null;
 
   const KNOWN_ARTICLE_FILES = {
     'bc-migration': '../article-bc-migration.html',
@@ -163,10 +176,12 @@
   (async function () {
     const admin = await initAdminShell('articles');
     if (!admin) return;
+    currentAdmin = admin;
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('adminShellRoot').style.display = 'flex';
 
     await loadServiceOptions();
+    document.getElementById('artHeroImageUrl').addEventListener('input', updateHeroImagePreview);
 
     const slug = new URLSearchParams(window.location.search).get('slug');
     document.getElementById('saveBtn').addEventListener('click', saveArticle);
@@ -218,6 +233,8 @@
       document.getElementById('artReadTime').value = article.read_time || '';
       document.getElementById('artByline').value = article.byline || '';
       document.getElementById('artIcon').value = article.hero_icon_key || 'implementation';
+      document.getElementById('artHeroImageUrl').value = article.hero_image_url || '';
+      updateHeroImagePreview();
       document.getElementById('artRelatedService').value = article.related_service_id || '';
       document.getElementById('artIntro').value = body.intro || '';
       document.getElementById('artCtaText').value = body.cta_text || '';
@@ -288,6 +305,51 @@
     renderSections();
   }
 
+  function updateHeroImagePreview() {
+    const url = document.getElementById('artHeroImageUrl').value.trim();
+    const wrap = document.getElementById('heroImagePreviewWrap');
+    const img = document.getElementById('heroImagePreview');
+    if (url) { img.src = url; wrap.style.display = 'block'; }
+    else { wrap.style.display = 'none'; }
+  }
+
+  async function uploadHeroImage() {
+    const fileInput = document.getElementById('artHeroImageFile');
+    const statusEl = document.getElementById('heroImageUploadStatus');
+    const file = fileInput.files[0];
+    if (!file) { showToast({ type: 'error', message: 'Choose a file first.' }); return; }
+
+    const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    if (okTypes.indexOf(file.type) === -1) { showToast({ type: 'error', message: 'Only PNG, JPEG, WEBP, or GIF images are supported.' }); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast({ type: 'error', message: 'Image must be under 5MB.' }); return; }
+
+    statusEl.textContent = 'Uploading…';
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const path = Date.now() + '-' + safeName;
+
+    try {
+      const { error: uploadErr } = await adminSupabase.storage.from('site-media').upload(path, file);
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = adminSupabase.storage.from('site-media').getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+
+      try {
+        await adminSupabase.from('media').insert({
+          file_name: file.name, storage_path: path, public_url: publicUrl,
+          uploaded_by: currentAdmin ? currentAdmin.id : null,
+        });
+      } catch (mediaErr) { /* non-fatal */ }
+
+      document.getElementById('artHeroImageUrl').value = publicUrl;
+      updateHeroImagePreview();
+      statusEl.textContent = 'Uploaded ✓';
+      showToast({ type: 'success', message: 'Image uploaded.' });
+    } catch (err) {
+      showToast({ type: 'error', message: 'Upload failed: ' + (err && err.message ? err.message : 'unknown error') });
+      statusEl.textContent = '';
+    }
+  }
+
   async function saveArticle() {
     const btn = document.getElementById('saveBtn');
     const titleVal = document.getElementById('artTitle').value.trim();
@@ -310,6 +372,7 @@
       read_time: document.getElementById('artReadTime').value,
       byline: document.getElementById('artByline').value,
       hero_icon_key: document.getElementById('artIcon').value,
+      hero_image_url: document.getElementById('artHeroImageUrl').value.trim() || null,
       related_service_id: relatedServiceVal,
       seo_title: document.getElementById('artSeoTitle').value || null,
       seo_description: document.getElementById('artSeoDesc').value || null,
