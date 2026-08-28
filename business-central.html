@@ -169,7 +169,7 @@
   .ledger-foot .balance{display:flex;align-items:center;gap:8px;}
 
   /* ---------- Section shell ---------- */
-  section{padding:88px 0;position:relative;}
+  section{padding-top:20px;position:relative;}
   .section-head{display:flex;flex-direction:column;gap:14px;margin-bottom:44px;max-width:640px;}
   h2.section-title{
     font-family:var(--font-display);font-weight:700;font-size:clamp(26px,3.4vw,36px);
@@ -276,10 +276,14 @@
   }
   .anchor-nav a{
     font-size:13px;color:#FFFFFF;text-decoration:none;
-    padding:8px 14px;border:1px solid var(--border);border-radius:100px;
-    white-space:nowrap;transition:all .15s ease;flex-shrink:0;
+    padding:10px 12px;border:1px solid var(--border);border-radius:10px;
+    text-align:center;transition:all .15s ease;display:flex;align-items:center;justify-content:center;
   }
-  #cms-anchor-nav{scrollbar-width:none;-ms-overflow-style:none;}
+  #cms-anchor-nav{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  @media(max-width:700px){#cms-anchor-nav{grid-template-columns:repeat(2,1fr);}}
   #cms-anchor-nav::-webkit-scrollbar{display:none;}
   .anchor-nav a:hover{color:#FFFFFF;border-color:var(--teal);}
 
@@ -461,13 +465,13 @@
   </section>
 
   <nav class="anchor-nav">
-    <div class="wrap" style="display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:0;" id="cms-anchor-nav">
-      <a href="#implementation">Implementation</a>
-<a href="#al-dev">Custom AL dev</a>
-<a href="#shopify">Shopify integration</a>
-<a href="#migration">Migration</a>
+    <div class="wrap" style="padding:0;" id="cms-anchor-nav">
+      <a href="#implementation">Standard implementation</a>
+<a href="#al-dev">Custom AL development</a>
+<a href="#shopify">Shopify BC integration</a>
+<a href="#migration">Migration from legacy ERP systems</a>
 <a href="#integrations">Integrations</a>
-<a href="#support">Support</a>
+<a href="#support">Functional & development support</a>
 <a href="#training">Consultation & training</a>
     </div>
   </nav>
