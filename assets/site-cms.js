@@ -253,9 +253,11 @@
   }
 
   function renderArticleCardHtml(article, index) {
-    const icon = article.hero_icon_key ? renderServiceIcon(article.hero_icon_key, 'art-' + index, 56) : '';
+    const visual = article.hero_image_url
+      ? '<img src="' + escapeHtmlLite(article.hero_image_url) + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
+      : (article.hero_icon_key ? renderServiceIcon(article.hero_icon_key, 'art-' + index, 56) : '');
     return '<a href="' + escapeHtmlLite(articleHref(article.slug)) + '" class="article-card">' +
-      '<div class="article-thumb" data-tag="' + escapeHtmlLite(article.tag) + '" style="display:flex;align-items:center;justify-content:center;">' + icon + '</div>' +
+      '<div class="article-thumb" data-tag="' + escapeHtmlLite(article.tag) + '" style="display:flex;align-items:center;justify-content:center;overflow:hidden;">' + visual + '</div>' +
       '<div class="article-body">' +
       '<p class="article-title">' + escapeHtmlLite(article.title) + '</p>' +
       '<p class="article-meta">' + escapeHtmlLite((article.read_time || '').toUpperCase()) + '</p>' +
@@ -271,7 +273,7 @@
     try {
       let query = cmsClient
         .from('articles')
-        .select('slug, title, tag, read_time, hero_icon_key')
+        .select('slug, title, tag, read_time, hero_icon_key, hero_image_url')
         .eq('status', 'published')
         .order('display_order', { ascending: true });
       if (limit) query = query.limit(limit);
@@ -321,8 +323,12 @@
       if (article.byline) setText('cms-article-byline', article.byline + ' · ' + article.read_time);
 
       const heroContainer = document.getElementById('cms-article-hero');
-      if (heroContainer && article.hero_icon_key) {
-        heroContainer.innerHTML = renderServiceIcon(article.hero_icon_key, 'detail-' + slug, 140);
+      if (heroContainer) {
+        if (article.hero_image_url) {
+          heroContainer.innerHTML = '<img src="' + escapeHtmlLite(article.hero_image_url) + '" alt="" style="width:100%;max-width:640px;border-radius:12px;display:block;">';
+        } else if (article.hero_icon_key) {
+          heroContainer.innerHTML = renderServiceIcon(article.hero_icon_key, 'detail-' + slug, 140);
+        }
       }
 
       const body = article.body || {};
