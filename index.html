@@ -219,10 +219,11 @@
   .article-grid{display:grid;grid-template-columns:1fr;gap:22px;}
   @media(min-width:700px){.article-grid{grid-template-columns:repeat(3,1fr);}}
   .article-card{
-    border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);
+    border:1px solid var(--border);border-top:3px solid #15024C;border-radius:14px;overflow:hidden;background:var(--card);
     text-decoration:none;color:var(--text);transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease;
   }
-  .article-card:hover{transform:translateY(-3px);border-color:var(--teal);box-shadow:0 16px 32px rgba(226,63,160,0.12);}
+  .article-card:hover{transform:translateY(-6px);border-color:var(--teal);box-shadow:0 20px 36px rgba(21,2,76,0.16);}
+  .article-readmore{display:block;margin-top:12px;font-size:13px;font-weight:600;color:#15024C;}
   .article-thumb{
     height:120px;position:relative;
     background:
@@ -463,6 +464,7 @@
           <div class="article-body">
             <p class="article-title">What actually changes during a BC migration</p>
             <p class="article-meta">5 MIN READ</p>
+            <span class="article-readmore">Read article &rarr;</span>
           </div>
         </a>
         <a href="article-odoo-modules.html" class="article-card">
@@ -479,6 +481,7 @@
           <div class="article-body">
             <p class="article-title">Choosing the right Odoo modules to start with</p>
             <p class="article-meta">4 MIN READ</p>
+            <span class="article-readmore">Read article &rarr;</span>
           </div>
         </a>
         <a href="article-zoho-reconciliation.html" class="article-card">
@@ -493,6 +496,7 @@
           <div class="article-body">
             <p class="article-title">Zoho Books reconciliation, monthly checklist</p>
             <p class="article-meta">6 MIN READ</p>
+            <span class="article-readmore">Read article &rarr;</span>
           </div>
         </a>
       </div>
