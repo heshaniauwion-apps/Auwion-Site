@@ -175,7 +175,7 @@
     const gradId = 'gsvc-' + uniqueId;
     const paths = (SERVICE_ICONS[iconKey] || '').split('{{grad}}').join('url(#' + gradId + ')');
     return '<svg viewBox="0 0 120 120" width="' + size + '" height="' + size + '" fill="none" xmlns="http://www.w3.org/2000/svg" style="direction:ltr;flex-shrink:0;">' +
-      '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>' +
+      '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15024C"/><stop offset="1" stop-color="#0FA898"/></linearGradient></defs>' +
       paths + '</svg>';
   }
 
