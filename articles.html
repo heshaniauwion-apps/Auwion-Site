@@ -452,14 +452,6 @@
       <div class="section-head reveal in">
         <div class="eyebrow">From the ledger</div>
         <h1 class="section-title" style="font-size:clamp(30px,4vw,44px);">Articles</h1>
-        <p class="section-sub">Guides, tips, and updates on Business Central, Zoho Books, Odoo, and web development.</p>
-      </div>
-      <div class="filter-row reveal in" id="articleFilters">
-        <a href="#" class="filter-pill active" data-filter="All">All</a>
-        <a href="#" class="filter-pill" data-filter="Business Central">Business Central</a>
-        <a href="#" class="filter-pill" data-filter="Zoho Books">Zoho Books</a>
-        <a href="#" class="filter-pill" data-filter="Odoo">Odoo</a>
-        <a href="#" class="filter-pill" data-filter="Web dev">Web dev</a>
       </div>
       <div class="article-grid reveal in" id="articleGrid">
         <a href="article-bc-migration.html" class="article-card">
@@ -578,21 +570,6 @@
   } else {
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
-
-  // Article filtering
-  var filterPills = document.querySelectorAll('#articleFilters .filter-pill');
-  filterPills.forEach(function(pill){
-    pill.addEventListener('click', function(e){
-      e.preventDefault();
-      filterPills.forEach(function(p){ p.classList.remove('active'); });
-      pill.classList.add('active');
-      var filter = pill.getAttribute('data-filter');
-      document.querySelectorAll('#articleGrid .article-card').forEach(function(card){
-        var tag = card.querySelector('.article-thumb').getAttribute('data-tag');
-        card.style.display = (filter === 'All' || tag === filter) ? '' : 'none';
-      });
-    });
-  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
