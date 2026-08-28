@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Article — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+<style>
+  .fieldset{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+  .fieldset h3{font-family:var(--font-display);font-size:15px;margin:0 0 16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:700px){.field-row{grid-template-columns:1fr;}}
+  .section-card{border:1px dashed var(--border-strong);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;}
+  .section-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .sticky-actions{
+    position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);
+    padding:14px 0;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+</style>
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1 id="editorTitle">New article</h1>
+      <p id="editorSlugLine" style="font-family:var(--font-mono);"></p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge" id="statusBadge" style="display:none;"></span>
+      <a href="articles.html" class="btn btn-secondary btn-sm">← Back to Articles</a>
+    </div>
+  </div>
+
+  <div id="editorError"></div>
+
+  <div class="fieldset">
+    <h3>Article details</h3>
+    <div class="field-row">
+      <div class="ac-field">
+        <label for="artTitle">Title</label>
+        <input type="text" id="artTitle">
+      </div>
+      <div class="ac-field">
+        <label for="artSlug">Slug (URL)</label>
+        <input type="text" id="artSlug" placeholder="e.g. my-new-article">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="ac-field">
+        <label for="artTag">Category</label>
+        <select id="artTag">
+          <option>Business Central</option>
+          <option>Zoho Books</option>
+          <option>Odoo</option>
+          <option>Web dev</option>
+        </select>
+      </div>
+      <div class="ac-field">
+        <label for="artReadTime">Read time</label>
+        <input type="text" id="artReadTime" placeholder="e.g. 5 min read">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="ac-field">
+        <label for="artByline">Byline</label>
+        <input type="text" id="artByline" placeholder="By Auwion team">
+      </div>
+      <div class="ac-field">
+        <label for="artIcon">Hero icon</label>
+        <select id="artIcon">
+          <option value="implementation">implementation</option>
+          <option value="al-dev">al-dev</option>
+          <option value="shopify">shopify</option>
+          <option value="migration">migration</option>
+          <option value="integrations">integrations</option>
+          <option value="support">support</option>
+          <option value="training">training</option>
+          <option value="bookkeeping">bookkeeping</option>
+          <option value="webapp">webapp</option>
+          <option value="website">website</option>
+          <option value="bc-migration">bc-migration</option>
+          <option value="odoo-modules">odoo-modules</option>
+          <option value="zoho-checklist">zoho-checklist</option>
+        </select>
+      </div>
+    </div>
+    <div class="ac-field">
+      <label for="artRelatedService">Related service (for the inline CTA button)</label>
+      <select id="artRelatedService"><option value="">— none —</option></select>
+    </div>
+  </div>
+
+  <div class="fieldset">
+    <h3>Content</h3>
+    <div class="ac-field">
+      <label for="artIntro">Intro paragraph</label>
+      <textarea id="artIntro" rows="3"></textarea>
+    </div>
+    <div id="sectionsList"></div>
+    <button type="button" class="btn btn-secondary btn-sm" onclick="addSection()">+ Add section</button>
+  </div>
+
+  <div class="fieldset">
+    <h3>Inline call-to-action</h3>
+    <div class="ac-field">
+      <label for="artCtaText">CTA prompt text</label>
+      <input type="text" id="artCtaText" placeholder="e.g. Need help with this?">
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin:0;">The button label/link are generated automatically from the related service selected above.</p>
+  </div>
+
+  <div class="fieldset">
+    <h3>SEO</h3>
+    <div class="ac-field">
+      <label for="artSeoTitle">SEO title (optional)</label>
+      <input type="text" id="artSeoTitle">
+    </div>
+    <div class="ac-field">
+      <label for="artSeoDesc">SEO description (optional)</label>
+      <input type="text" id="artSeoDesc">
+    </div>
+  </div>
+
+  <div class="sticky-actions">
+    <div class="status-toggle">
+      <label style="font-size:13px;font-weight:600;color:var(--text-soft);">Status</label>
+      <select id="statusSelect" class="ac-field" style="width:auto;padding:8px 12px;">
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-danger" id="deleteBtn" style="display:none;">Delete article</button>
+      <a href="#" id="previewLink" target="_blank" class="btn btn-secondary">Preview ↗</a>
+      <button class="btn btn-primary" id="saveBtn">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  let currentArticle = null;
+  let isNewArticle = false;
+  let sections = []; // [{heading, body}]
+
+  const KNOWN_ARTICLE_FILES = {
+    'bc-migration': '../article-bc-migration.html',
+    'odoo-modules': '../article-odoo-modules.html',
+    'zoho-reconciliation': '../article-zoho-reconciliation.html',
+  };
+
+  (async function () {
+    const admin = await initAdminShell('articles');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+
+    await loadServiceOptions();
+
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    document.getElementById('saveBtn').addEventListener('click', saveArticle);
+
+    if (!slug) {
+      isNewArticle = true;
+      currentArticle = { id: null, title: '', slug: '', tag: 'Business Central', read_time: '', byline: 'By Auwion team', hero_icon_key: 'implementation', related_service_id: '', seo_title: '', seo_description: '', status: 'draft', body: {} };
+      sections = [];
+      renderSections();
+      updatePreviewLink();
+      return;
+    }
+    await loadArticle(slug);
+  })();
+
+  async function loadServiceOptions() {
+    try {
+      const { data } = await adminSupabase.from('services').select('id, name').order('display_order');
+      const sel = document.getElementById('artRelatedService');
+      (data || []).forEach(function (s) {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+    } catch (e) { /* non-fatal */ }
+  }
+
+  async function loadArticle(slug) {
+    try {
+      const { data: article, error } = await adminSupabase
+        .from('articles').select('*').eq('slug', slug).maybeSingle();
+      if (error) throw error;
+      if (!article) { document.getElementById('editorError').innerHTML = renderErrorBanner('Article not found: ' + slug); return; }
+
+      currentArticle = article;
+      const body = article.body || {};
+      sections = Array.isArray(body.sections) ? body.sections.slice() : [];
+
+      document.getElementById('editorTitle').textContent = article.title;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + article.slug;
+      updateStatusBadge(article.status);
+      document.getElementById('deleteBtn').style.display = 'inline-flex';
+      document.getElementById('deleteBtn').addEventListener('click', deleteArticle);
+
+      document.getElementById('artTitle').value = article.title || '';
+      document.getElementById('artSlug').value = article.slug || '';
+      document.getElementById('artTag').value = article.tag || 'Business Central';
+      document.getElementById('artReadTime').value = article.read_time || '';
+      document.getElementById('artByline').value = article.byline || '';
+      document.getElementById('artIcon').value = article.hero_icon_key || 'implementation';
+      document.getElementById('artRelatedService').value = article.related_service_id || '';
+      document.getElementById('artIntro').value = body.intro || '';
+      document.getElementById('artCtaText').value = body.cta_text || '';
+      document.getElementById('artSeoTitle').value = article.seo_title || '';
+      document.getElementById('artSeoDesc').value = article.seo_description || '';
+      document.getElementById('statusSelect').value = article.status;
+
+      renderSections();
+      updatePreviewLink();
+    } catch (err) {
+      document.getElementById('editorError').innerHTML = renderErrorBanner('Could not load article: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+
+  function updateStatusBadge(status) {
+    const el = document.getElementById('statusBadge');
+    el.style.display = 'inline-block';
+    el.textContent = status;
+    el.className = 'badge ' + (status === 'published' ? 'badge-published' : 'badge-draft');
+  }
+
+  function updatePreviewLink() {
+    const slug = document.getElementById('artSlug').value.trim();
+    const link = document.getElementById('previewLink');
+    if (!slug) { link.href = '#'; link.style.opacity = '.5'; link.style.pointerEvents = 'none'; return; }
+    link.style.opacity = '1'; link.style.pointerEvents = 'auto';
+    link.href = KNOWN_ARTICLE_FILES[slug] || ('../article.html?slug=' + encodeURIComponent(slug));
+  }
+
+  function renderSections() {
+    const container = document.getElementById('sectionsList');
+    if (sections.length === 0) {
+      container.innerHTML = '<p style="font-size:12px;color:var(--text-dim);">No sections yet — click "+ Add section" below.</p>';
+      return;
+    }
+    container.innerHTML = sections.map(function (s, i) {
+      return '<div class="section-card">' +
+        '<div class="section-card-head"><strong>Section ' + (i + 1) + '</strong>' +
+        '<button type="button" class="btn btn-danger btn-sm" onclick="removeSection(' + i + ')">Remove</button></div>' +
+        '<div class="ac-field"><label>Heading</label><input type="text" id="secHeading' + i + '"></div>' +
+        '<div class="ac-field"><label>Body</label><textarea id="secBody' + i + '" rows="2"></textarea></div>' +
+        '</div>';
+    }).join('');
+    sections.forEach(function (s, i) {
+      document.getElementById('secHeading' + i).value = s.heading || '';
+      document.getElementById('secBody' + i).value = s.body || '';
+    });
+  }
+
+  function readSectionsFromForm() {
+    sections.forEach(function (s, i) {
+      const h = document.getElementById('secHeading' + i);
+      const b = document.getElementById('secBody' + i);
+      if (h) s.heading = h.value;
+      if (b) s.body = b.value;
+    });
+  }
+
+  function addSection() {
+    readSectionsFromForm();
+    sections.push({ heading: '', body: '' });
+    renderSections();
+  }
+
+  function removeSection(i) {
+    readSectionsFromForm();
+    sections.splice(i, 1);
+    renderSections();
+  }
+
+  async function saveArticle() {
+    const btn = document.getElementById('saveBtn');
+    const titleVal = document.getElementById('artTitle').value.trim();
+    const slugVal = document.getElementById('artSlug').value.trim();
+
+    if (!titleVal || !slugVal) { showToast({ type: 'error', message: 'Title and slug are both required.' }); return; }
+    if (!/^[a-z0-9-]+$/.test(slugVal)) { showToast({ type: 'error', message: 'Slug can only contain lowercase letters, numbers, and hyphens.' }); return; }
+
+    readSectionsFromForm();
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    const relatedServiceVal = document.getElementById('artRelatedService').value || null;
+    const newStatus = document.getElementById('statusSelect').value;
+
+    const payload = {
+      title: titleVal,
+      slug: slugVal,
+      tag: document.getElementById('artTag').value,
+      read_time: document.getElementById('artReadTime').value,
+      byline: document.getElementById('artByline').value,
+      hero_icon_key: document.getElementById('artIcon').value,
+      related_service_id: relatedServiceVal,
+      seo_title: document.getElementById('artSeoTitle').value || null,
+      seo_description: document.getElementById('artSeoDesc').value || null,
+      status: newStatus,
+      body: {
+        intro: document.getElementById('artIntro').value,
+        sections: sections,
+        cta_text: document.getElementById('artCtaText').value,
+      },
+    };
+    if (newStatus === 'published' && !currentArticle.published_at) {
+      payload.published_at = new Date().toISOString();
+    }
+
+    try {
+      if (isNewArticle) {
+        const { data: created, error } = await adminSupabase.from('articles').insert(payload).select().single();
+        if (error) throw error;
+        showToast({ type: 'success', message: 'Article created.' });
+        setTimeout(function () { window.location.href = 'article-edit.html?slug=' + encodeURIComponent(created.slug); }, 600);
+        return;
+      }
+
+      const { data: updated, error } = await adminSupabase.from('articles').update(payload).eq('id', currentArticle.id).select().single();
+      if (error) throw error;
+
+      currentArticle = updated;
+      updateStatusBadge(updated.status);
+      document.getElementById('editorTitle').textContent = updated.title;
+      document.getElementById('editorSlugLine').textContent = 'slug: ' + updated.slug;
+      updatePreviewLink();
+      showToast({ type: 'success', message: 'Article saved. Changes are live if published.' });
+    } catch (err) {
+      const msg = (err && err.message) || 'unknown error';
+      const friendly = msg.indexOf('duplicate key') !== -1 ? 'That slug is already used by another article.' : msg;
+      showToast({ type: 'error', message: 'Save failed: ' + friendly });
+    } finally {
+      btn.textContent = 'Save changes';
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteArticle() {
+    const confirmed = await confirmDialog({
+      title: 'Delete "' + currentArticle.title + '"?',
+      message: 'This permanently removes the article. If this is one of the 3 original articles, its page file will remain on the server and will simply revert to showing its original built-in text, since that page was never rebuilt to show a "not found" state.',
+      confirmLabel: 'Delete article',
+      danger: true,
+    });
+    if (!confirmed) return;
+    try {
+      const { error } = await adminSupabase.from('articles').delete().eq('id', currentArticle.id);
+      if (error) throw error;
+      showToast({ type: 'success', message: 'Article deleted.' });
+      setTimeout(function () { window.location.href = 'articles.html'; }, 600);
+    } catch (err) {
+      showToast({ type: 'error', message: 'Delete failed: ' + (err && err.message ? err.message : 'unknown error') });
+    }
+  }
+</script>
+</body>
+</html>

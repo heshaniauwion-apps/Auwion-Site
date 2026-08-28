@@ -22,7 +22,7 @@
       <h1>Articles</h1>
       <p>Manage the articles shown on the Articles page and featured on Home.</p>
     </div>
-    <button class="btn btn-primary" disabled title="Coming soon">+ New article</button>
+    <a href="article-edit.html" class="btn btn-primary">+ New article</a>
   </div>
 
   <div class="toolbar">
@@ -101,7 +101,7 @@
       container.innerHTML = renderStateBlock({
         icon: 'articles',
         title: 'No articles yet',
-        description: 'Article management (create, edit, publish) is coming in the next step. Once articles exist, this search and filter bar will work against them.',
+        description: 'Click "+ New article" to create your first one.',
       });
       return;
     }
@@ -117,7 +117,7 @@
 
     const rows = filtered.map(function (a) {
       const badge = a.status === 'published' ? 'badge-published' : 'badge-draft';
-      return '<tr class="clickable"><td>' + escapeHtml(a.title) + '</td><td>' + escapeHtml(a.tag) + '</td>' +
+      return '<tr class="clickable" onclick="window.location.href=\'article-edit.html?slug=' + encodeURIComponent(a.slug) + '\'"><td>' + escapeHtml(a.title) + '</td><td>' + escapeHtml(a.tag) + '</td>' +
         '<td><span class="badge ' + badge + '">' + escapeHtml(a.status) + '</span></td><td>' + formatDate(a.updated_at) + '</td></tr>';
     }).join('');
 
