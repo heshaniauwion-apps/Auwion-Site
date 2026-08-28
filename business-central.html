@@ -277,18 +277,20 @@
   .anchor-nav a{
     font-size:13px;color:#FFFFFF;text-decoration:none;
     padding:8px 14px;border:1px solid var(--border);border-radius:100px;
-    white-space:nowrap;transition:all .15s ease;
+    white-space:nowrap;transition:all .15s ease;flex-shrink:0;
   }
+  #cms-anchor-nav{scrollbar-width:none;-ms-overflow-style:none;}
+  #cms-anchor-nav::-webkit-scrollbar{display:none;}
   .anchor-nav a:hover{color:#FFFFFF;border-color:var(--teal);}
 
   .sub-block{
-    display:grid;grid-template-columns:1fr;gap:20px;
-    padding:36px 0;border-bottom:1px solid var(--border-soft);
+    display:grid;grid-template-columns:1fr;gap:16px;
+    padding:22px 0;border-bottom:1px solid var(--border-soft);
     scroll-margin-top:150px;
   }
-  @media(min-width:760px){.sub-block{grid-template-columns:1fr 1fr;align-items:center;gap:32px;}}
+  @media(min-width:760px){.sub-block{grid-template-columns:1fr 1fr;align-items:center;gap:24px;}}
   .sub-block .visual{
-    height:140px;
+    height:100px;
   }
   .sub-block h3{font-family:var(--font-display);font-size:22px;font-weight:600;margin:0 0 10px;}
   .sub-block p{color:var(--text-soft);font-size:15px;margin:0;line-height:1.7;}
@@ -459,7 +461,7 @@
   </section>
 
   <nav class="anchor-nav">
-    <div class="wrap" style="display:flex;gap:8px;flex-wrap:wrap;padding:0;" id="cms-anchor-nav">
+    <div class="wrap" style="display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding:0;" id="cms-anchor-nav">
       <a href="#implementation">Implementation</a>
 <a href="#al-dev">Custom AL dev</a>
 <a href="#shopify">Shopify integration</a>
