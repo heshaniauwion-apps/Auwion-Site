@@ -168,6 +168,9 @@
     bookkeeping: '<rect x="26" y="18" width="68" height="84" rx="6" stroke="{{grad}}" stroke-width="4"/><path d="M40 38h40M40 54h40M40 70h26" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/><path d="M60 84l8 8 14-16" stroke="{{grad}}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
     webapp: '<rect x="14" y="24" width="92" height="66" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M14 40h92" stroke="{{grad}}" stroke-width="4"/><circle cx="26" cy="32" r="2.4" fill="{{grad}}"/><circle cx="35" cy="32" r="2.4" fill="{{grad}}"/><path d="M44 62l-12 10 12 10M76 62l12 10-12 10M64 58l-8 28" stroke="{{grad}}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
     website: '<rect x="14" y="24" width="92" height="66" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M14 40h92" stroke="{{grad}}" stroke-width="4"/><circle cx="26" cy="32" r="2.4" fill="{{grad}}"/><circle cx="35" cy="32" r="2.4" fill="{{grad}}"/><rect x="26" y="50" width="24" height="30" rx="3" stroke="{{grad}}" stroke-width="3"/><path d="M58 52h34M58 62h34M58 72h22" stroke="{{grad}}" stroke-width="3" stroke-linecap="round"/>',
+    'bc-migration': '<rect x="10" y="41.25" width="31.25" height="31.25" rx="5" stroke="{{grad}}" stroke-width="3"/><rect x="78.75" y="47.5" width="31.25" height="31.25" rx="5" stroke="{{grad}}" stroke-width="3"/><path d="M43.75 55h32.5M65 48.75l11.25 7.5-11.25 7.5" stroke="{{grad}}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    'odoo-modules': '<rect x="10" y="30" width="26.15" height="26.15" rx="4" stroke="{{grad}}" stroke-width="3"/><rect x="46.91" y="30" width="26.15" height="26.15" rx="4" stroke="{{grad}}" stroke-width="3"/><rect x="83.82" y="30" width="26.15" height="26.15" rx="4" stroke="{{grad}}" stroke-width="3"/><rect x="28.46" y="63.84" width="26.15" height="26.15" rx="4" stroke="{{grad}}" stroke-width="3"/><rect x="65.37" y="63.84" width="26.15" height="26.15" rx="4" stroke="{{grad}}" stroke-width="3"/>',
+    'zoho-checklist': '<rect x="15" y="10" width="90" height="100" rx="8" stroke="{{grad}}" stroke-width="4"/><path d="M32 34h56M32 50h56M32 66h34" stroke="{{grad}}" stroke-width="4" stroke-linecap="round"/><path d="M34 86l10 10 20-22" stroke="{{grad}}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
   };
 
   function renderServiceIcon(iconKey, uniqueId, size) {
@@ -232,6 +235,129 @@
   // Renders the 5-row services table (used on both Home and Services
   // overview) from the services table.
   // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // Articles. The 3 real existing articles keep their own static page
+  // files (article-bc-migration.html etc.) to preserve their exact URLs —
+  // this maps DB slug -> that real filename. Any NEW article created via
+  // the admin later (with no pre-made file) falls back to the generic
+  // article.html?slug=... template.
+  // ---------------------------------------------------------------------
+  const KNOWN_ARTICLE_FILES = {
+    'bc-migration': 'article-bc-migration.html',
+    'odoo-modules': 'article-odoo-modules.html',
+    'zoho-reconciliation': 'article-zoho-reconciliation.html',
+  };
+
+  function articleHref(slug) {
+    return KNOWN_ARTICLE_FILES[slug] || ('article.html?slug=' + encodeURIComponent(slug));
+  }
+
+  function renderArticleCardHtml(article, index) {
+    const icon = article.hero_icon_key ? renderServiceIcon(article.hero_icon_key, 'art-' + index, 56) : '';
+    return '<a href="' + escapeHtmlLite(articleHref(article.slug)) + '" class="article-card">' +
+      '<div class="article-thumb" data-tag="' + escapeHtmlLite(article.tag) + '" style="display:flex;align-items:center;justify-content:center;">' + icon + '</div>' +
+      '<div class="article-body">' +
+      '<p class="article-title">' + escapeHtmlLite(article.title) + '</p>' +
+      '<p class="article-meta">' + escapeHtmlLite((article.read_time || '').toUpperCase()) + '</p>' +
+      '</div></a>';
+  }
+
+  // Used on both Home (limit 3, featured) and articles.html (no limit,
+  // full grid with working filters).
+  async function loadArticleCards(limit) {
+    const container = document.getElementById('cms-article-grid');
+    if (!container) return;
+
+    try {
+      let query = cmsClient
+        .from('articles')
+        .select('slug, title, tag, read_time, hero_icon_key')
+        .eq('status', 'published')
+        .order('display_order', { ascending: true });
+      if (limit) query = query.limit(limit);
+
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) return; // keep built-in cards as-is
+
+      container.innerHTML = data.map(function (a, i) { return renderArticleCardHtml(a, i); }).join('');
+    } catch (e) {
+      console.warn('[site-cms] Failed to load article cards:', e && e.message);
+    }
+  }
+
+  // Renders a single article's full content into one of the 3 real
+  // article pages. Safe rendering: every field uses textContent, except
+  // the sections list which is rebuilt with createElement/textContent
+  // (never innerHTML), matching the same safe pattern used for Privacy/Terms.
+  async function loadSingleArticle(slug) {
+    const marker = document.getElementById('cms-article-detail');
+    if (!marker) return;
+
+    // These 3 only exist on the generic article.html?slug=... template —
+    // the 3 real static article pages don't have them, so these calls
+    // are safely no-ops there.
+    const loadingEl = document.getElementById('cms-article-loading');
+    const notFoundEl = document.getElementById('cms-article-notfound');
+
+    function showNotFound() {
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (notFoundEl) notFoundEl.style.display = 'block';
+    }
+
+    if (!slug) { showNotFound(); return; }
+
+    try {
+      const { data: article, error } = await cmsClient
+        .from('articles')
+        .select('*, services(slug, name)')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .maybeSingle();
+
+      if (error || !article) { showNotFound(); return; }
+
+      setText('cms-article-tag', article.tag);
+      setText('cms-article-title', article.title);
+      if (article.byline) setText('cms-article-byline', article.byline + ' · ' + article.read_time);
+
+      const heroContainer = document.getElementById('cms-article-hero');
+      if (heroContainer && article.hero_icon_key) {
+        heroContainer.innerHTML = renderServiceIcon(article.hero_icon_key, 'detail-' + slug, 140);
+      }
+
+      const body = article.body || {};
+      const bodyContainer = document.getElementById('cms-article-body');
+      if (bodyContainer && body.intro) {
+        const introP = document.createElement('p');
+        introP.textContent = body.intro;
+        bodyContainer.innerHTML = '';
+        bodyContainer.appendChild(introP);
+        (body.sections || []).forEach(function (s) {
+          const h2 = document.createElement('h2');
+          h2.textContent = s.heading || '';
+          const p = document.createElement('p');
+          p.textContent = s.body || '';
+          bodyContainer.appendChild(h2);
+          bodyContainer.appendChild(p);
+        });
+      }
+
+      if (body.cta_text) setText('cms-article-cta-text', body.cta_text);
+      const svc = article.services;
+      if (svc) {
+        setLink('cms-article-cta-button', 'See ' + svc.name + ' services →', svc.slug + '.html');
+      }
+
+      if (article.seo_title) document.title = article.seo_title;
+
+      if (loadingEl) loadingEl.style.display = 'none';
+      marker.style.display = 'block';
+    } catch (e) {
+      console.warn('[site-cms] Failed to load article "' + slug + '":', e && e.message);
+      showNotFound();
+    }
+  }
+
   async function loadServicesTable() {
     const tableEl = document.getElementById('cms-services-table');
     if (!tableEl) return;
@@ -424,6 +550,21 @@
     loadServicesTable();
     if (slug === 'business-central' || slug === 'zoho-books' || slug === 'odoo' || slug === 'web-development') {
       loadServiceBlocks(slug);
+    }
+
+    // Article cards: Home shows 3 featured, Articles page shows all.
+    if (slug === 'home') loadArticleCards(3);
+    if (slug === 'articles') loadArticleCards(null);
+
+    // The 3 real article pages are keyed by a fixed data-cms-page slug.
+    // The generic template (article.html) instead reads its slug from
+    // the URL query string, since it has to serve any article slug.
+    const KNOWN_ARTICLE_SLUGS = ['bc-migration', 'odoo-modules', 'zoho-reconciliation'];
+    if (KNOWN_ARTICLE_SLUGS.indexOf(slug) !== -1) {
+      loadSingleArticle(slug);
+    } else if (slug === 'article-generic') {
+      const querySlug = new URLSearchParams(window.location.search).get('slug');
+      loadSingleArticle(querySlug);
     }
 
     if (!slug || !PAGE_RENDERERS[slug]) {
