@@ -12,7 +12,7 @@
   --surface-2:#F9FAFD;
   --border:rgba(16,20,43,0.10);
   --border-strong:rgba(16,20,43,0.16);
-  --pink:#3B82F6;
+  --pink:#15024C;
   --teal:#0FA898;
   --grad: linear-gradient(90deg, var(--pink), var(--teal));
   --text:#10142B;
@@ -172,7 +172,7 @@ table.ac-table tr.clickable:hover{background:var(--surface-2);cursor:pointer;}
 .badge-draft{background:var(--warn-bg);color:var(--warn);}
 .badge-disabled{background:var(--danger-bg);color:var(--danger);}
 .badge-active{background:var(--success-bg);color:var(--success);}
-.badge-role{background:rgba(59,130,246,0.10);color:var(--pink);}
+.badge-role{background:rgba(21,2,76,0.10);color:var(--pink);}
 
 /* ---------------------------------------------------------------------- */
 /* Forms                                                                   */
@@ -196,14 +196,14 @@ table.ac-table tr.clickable:hover{background:var(--surface-2);cursor:pointer;}
   font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:100px;border:1px solid var(--border-strong);
   background:var(--surface);color:var(--text-soft);cursor:pointer;white-space:nowrap;
 }
-.filter-pill.active{background:var(--grad);color:#0A0820;border-color:transparent;}
+.filter-pill.active{background:var(--grad);color:#fff;border-color:transparent;}
 .filter-pill:hover:not(.active){border-color:var(--teal);}
 
 /* ---------------------------------------------------------------------- */
 /* Buttons                                                                 */
 /* ---------------------------------------------------------------------- */
 .btn{font-family:var(--font-body);font-weight:600;font-size:13.5px;border-radius:100px;padding:9px 18px;cursor:pointer;border:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
-.btn-primary{background:var(--grad);color:#0A0820;}
+.btn-primary{background:var(--grad);color:#fff;}
 .btn-primary:hover{opacity:.9;}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
 .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border-strong);}
