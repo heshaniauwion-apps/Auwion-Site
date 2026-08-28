@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Users — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1>Admin Users</h1>
+      <p>Who has access to this dashboard, and at what role. Restricted to super admins.</p>
+    </div>
+    <button class="btn btn-primary" disabled title="Coming soon">+ Invite admin</button>
+  </div>
+
+  <div class="toolbar" id="adminToolbar" style="display:none;">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.3-4.3"/></svg>
+      <input type="text" id="adminSearch" placeholder="Search by name or email…">
+    </div>
+  </div>
+
+  <div id="adminUsersResult">
+    <div style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:40px 0;text-align:center;">Loading admins…</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  let allAdmins = [];
+
+  (async function () {
+    const admin = await initAdminShell('admin-users');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+
+    if (!requireSuperAdminOrRedirect(admin)) return;
+
+    document.getElementById('adminToolbar').style.display = 'flex';
+    await loadAdminUsers();
+
+    document.getElementById('adminSearch').addEventListener('input', function (e) {
+      renderAdminUsers(e.target.value.trim().toLowerCase());
+    });
+  })();
+
+  async function loadAdminUsers() {
+    const container = document.getElementById('adminUsersResult');
+    try {
+      // RLS restricts full visibility of this table to super_admins — an
+      // editor calling this same query would only ever see their own row.
+      const { data, error } = await adminSupabase
+        .from('admin_users')
+        .select('id, email, full_name, role, status, created_at, last_login_at')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      allAdmins = data || [];
+      renderAdminUsers('');
+    } catch (err) {
+      container.innerHTML = renderErrorBanner('Could not load admin users: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+
+  function renderAdminUsers(search) {
+    const container = document.getElementById('adminUsersResult');
+    const filtered = allAdmins.filter(function (a) {
+      if (!search) return true;
+      return (a.email || '').toLowerCase().indexOf(search) !== -1 ||
+             (a.full_name || '').toLowerCase().indexOf(search) !== -1;
+    });
+
+    if (allAdmins.length === 0) {
+      container.innerHTML = renderStateBlock({ icon: 'adminUsers', title: 'No admins found', description: 'This should not normally happen since you are logged in as one.' });
+      return;
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = renderStateBlock({ icon: 'search', title: 'No matching admins', description: 'Try a different search term.' });
+      return;
+    }
+
+    const rows = filtered.map(function (a) {
+      const roleBadge = '<span class="badge badge-role">' + escapeHtml(a.role) + '</span>';
+      const statusBadge = a.status === 'active'
+        ? '<span class="badge badge-active">active</span>'
+        : '<span class="badge badge-disabled">disabled</span>';
+      return '<tr><td>' + escapeHtml(a.full_name || '—') + '</td><td>' + escapeHtml(a.email) + '</td>' +
+        '<td>' + roleBadge + '</td><td>' + statusBadge + '</td>' +
+        '<td>' + formatDate(a.created_at) + '</td><td>' + formatDate(a.last_login_at) + '</td></tr>';
+    }).join('');
+
+    container.innerHTML =
+      '<div class="ac-table-wrap"><div class="table-scroll"><table class="ac-table">' +
+      '<thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Added</th><th>Last login</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div></div>';
+  }
+</script>
+</body>
+</html>
