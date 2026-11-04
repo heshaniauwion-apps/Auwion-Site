@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navigation — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1>Navigation</h1>
+      <p>Header links and the 3 footer link columns (Services, Company, Resources), shared across all 19 pages of the site.</p>
+    </div>
+    <button class="btn btn-primary" disabled title="Coming soon">+ Add link</button>
+  </div>
+
+  <div id="navResult">
+    <div style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:40px 0;text-align:center;">Loading navigation…</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  (async function () {
+    const admin = await initAdminShell('navigation');
+    if (!admin) return;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+    loadNavLinks();
+  })();
+
+  async function loadNavLinks() {
+    const container = document.getElementById('navResult');
+    try {
+      const { data, error } = await adminSupabase
+        .from('nav_links')
+        .select('id, location, label, url, display_order, status')
+        .order('location', { ascending: true })
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        container.innerHTML = renderStateBlock({
+          icon: 'navigation',
+          title: 'No navigation links yet',
+          description: 'Editing the header and footer links (currently the same on every page) is coming in the next step.',
+        });
+        return;
+      }
+
+      const rows = data.map(function (n) {
+        const badge = n.status === 'published' ? 'badge-published' : 'badge-draft';
+        return '<tr><td>' + escapeHtml(n.location) + '</td><td>' + escapeHtml(n.label) + '</td><td><code>' + escapeHtml(n.url) + '</code></td>' +
+          '<td><span class="badge ' + badge + '">' + escapeHtml(n.status) + '</span></td></tr>';
+      }).join('');
+
+      container.innerHTML =
+        '<div class="ac-table-wrap"><div class="table-scroll"><table class="ac-table">' +
+        '<thead><tr><th>Location</th><th>Label</th><th>URL</th><th>Status</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></div>';
+    } catch (err) {
+      container.innerHTML = renderErrorBanner('Could not load navigation links: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+</script>
+</body>
+</html>

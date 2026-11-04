@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Auwion Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/admin-ui.css">
+</head>
+<body>
+
+<div id="loadingState" class="shell-loading">Checking admin session…</div>
+<div id="adminShellRoot" class="admin-layout" style="display:none;"></div>
+
+<!-- Page-specific content, moved into the shell's <main> by admin-ui.js -->
+<div id="pageContent" style="display:none;">
+  <div class="page-head">
+    <div>
+      <h1 id="welcomeHeading">Welcome</h1>
+      <p>A live overview of your Auwion website content.</p>
+    </div>
+  </div>
+
+  <div id="statsError"></div>
+
+  <div class="stat-grid" id="statGrid">
+    <div class="stat-card"><div class="label">Pages</div><div class="value skeleton" id="statPages">&nbsp;</div></div>
+    <div class="stat-card"><div class="label">Services</div><div class="value skeleton" id="statServices">&nbsp;</div></div>
+    <div class="stat-card"><div class="label">Articles</div><div class="value skeleton" id="statArticles">&nbsp;</div></div>
+    <div class="stat-card"><div class="label">Published Articles</div><div class="value skeleton" id="statPublished">&nbsp;</div></div>
+    <div class="stat-card"><div class="label">Draft Articles</div><div class="value skeleton" id="statDraft">&nbsp;</div></div>
+    <div class="stat-card"><div class="label">Media Files</div><div class="value skeleton" id="statMedia">&nbsp;</div></div>
+  </div>
+
+  <div class="ac-card" style="margin-bottom:24px;">
+    <h3 style="font-family:var(--font-display);font-size:16px;margin:0 0 4px;">Recent activity</h3>
+    <p style="color:var(--text-soft);font-size:13px;margin:0 0 16px;">The latest content changes made by admins, logged automatically.</p>
+    <div id="activityContainer">
+      <div style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px 0;text-align:center;">Loading…</div>
+    </div>
+  </div>
+
+  <div class="ac-card">
+    <h3 style="font-family:var(--font-display);font-size:16px;margin:0 0 4px;">Next steps</h3>
+    <p style="color:var(--text-soft);font-size:13.5px;margin:0;">
+      This dashboard is connected to your real Supabase project. Content-management screens for each
+      section in the sidebar are being built next, on top of this same layout and authentication guard.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-client.js"></script>
+<script src="assets/admin-ui.js"></script>
+<script>
+  (async function () {
+    const admin = await initAdminShell('dashboard');
+    if (!admin) return;
+
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('adminShellRoot').style.display = 'flex';
+    document.getElementById('welcomeHeading').textContent = 'Welcome, ' + (admin.full_name || admin.email);
+
+    loadDashboardStats();
+    loadRecentActivity();
+  })();
+
+  function setStat(id, value) {
+    var el = document.getElementById(id);
+    el.textContent = value;
+    el.classList.remove('skeleton');
+  }
+
+  async function loadDashboardStats() {
+    try {
+      const [pagesRes, servicesRes, articlesRes, publishedRes, draftRes, mediaRes] = await Promise.all([
+        adminSupabase.from('pages').select('id', { count: 'exact', head: true }),
+        adminSupabase.from('services').select('id', { count: 'exact', head: true }),
+        adminSupabase.from('articles').select('id', { count: 'exact', head: true }),
+        adminSupabase.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+        adminSupabase.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        adminSupabase.from('media').select('id', { count: 'exact', head: true }),
+      ]);
+
+      const results = { pagesRes, servicesRes, articlesRes, publishedRes, draftRes, mediaRes };
+      const firstError = Object.values(results).find(function (r) { return r.error; });
+      if (firstError) throw firstError.error;
+
+      setStat('statPages', pagesRes.count);
+      setStat('statServices', servicesRes.count);
+      setStat('statArticles', articlesRes.count);
+      setStat('statPublished', publishedRes.count);
+      setStat('statDraft', draftRes.count);
+      setStat('statMedia', mediaRes.count);
+    } catch (err) {
+      document.getElementById('statsError').innerHTML = renderErrorBanner(
+        'Could not load statistics: ' + (err && err.message ? err.message : 'unknown error')
+      );
+      ['statPages', 'statServices', 'statArticles', 'statPublished', 'statDraft', 'statMedia'].forEach(function (id) {
+        setStat(id, '—');
+      });
+    }
+  }
+
+  async function loadRecentActivity() {
+    const container = document.getElementById('activityContainer');
+    try {
+      const { data, error } = await adminSupabase
+        .from('admin_activity_log')
+        .select('id, action, table_name, record_id, created_at, admin_users(email)')
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        container.innerHTML = renderStateBlock({
+          icon: 'inbox',
+          title: 'No activity yet',
+          description: 'Changes made in the admin dashboard will show up here automatically, with who made them and when.',
+        });
+        return;
+      }
+
+      const rows = data.map(function (row) {
+        const who = row.admin_users ? row.admin_users.email : 'Unknown';
+        return '<tr><td>' + escapeHtml(row.action) + '</td><td>' + escapeHtml(row.table_name || '—') +
+          '</td><td>' + escapeHtml(who) + '</td><td>' + formatDate(row.created_at) + '</td></tr>';
+      }).join('');
+
+      container.innerHTML =
+        '<div class="ac-table-wrap"><div class="table-scroll"><table class="ac-table">' +
+        '<thead><tr><th>Action</th><th>Table</th><th>Admin</th><th>When</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></div>';
+    } catch (err) {
+      container.innerHTML = renderErrorBanner('Could not load recent activity: ' + (err && err.message ? err.message : 'unknown error'));
+    }
+  }
+</script>
+</body>
+</html>
