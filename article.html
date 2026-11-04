@@ -395,11 +395,11 @@
     background:linear-gradient(135deg, rgba(226,63,160,0.18), rgba(47,224,196,0.18));
     border:1px solid var(--border);
   }
-  /* When the hero holds an uploaded image (not an icon), let it size to the image
-     instead of the fixed 220px box, so tall images don't spill over the text. */
+  /* FIX: when the hero holds an uploaded image (not an icon), size the box to the
+     image instead of the fixed 220px, so tall images don't overlap the text. */
   .article-full .hero-img:has(img){height:auto;padding:16px;}
   .article-full .hero-img img{max-width:100%;height:auto;}
-  .article-full .body-copy p{color:var(--text-soft);font-size:16px;line-height:1.8;margin:0 0 20px;white-space:pre-line;}
+  .article-full .body-copy p{color:var(--text-soft);font-size:16px;line-height:1.8;margin:0 0 20px;}
   .article-full .body-copy h2{font-family:var(--font-display);font-size:22px;margin:36px 0 14px;}
   .inline-cta{
     margin-top:40px;padding:22px 24px;border:1px solid var(--border);border-radius:14px;
@@ -430,22 +430,24 @@
   <div class="wrap nav">
     <a href="index.html" class="wordmark">AUW<span>I</span>ON</a>
     <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about-us.html">About Us</a>
       <a href="services.html">Services</a>
       <a href="articles.html">Articles</a>
-      <a href="login.html">Client login</a>
-      <a href="about.html">Contact</a>
+      <a href="https://hasithw.github.io/Invoice-Follow-Up/">Client login</a>
     </nav>
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="about.html#contact" class="btn btn-primary nav-cta">Get in touch</a>
+      <a href="https://www.auwion.com/contact.html" class="btn btn-primary nav-cta">Get in touch</a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" id="menuToggle">MENU</button>
     </div>
   </div>
   <div class="wrap" data-mobile-nav id="mobile-nav">
     <nav class="links-mobile">
+      <a href="index.html">Home</a>
+      <a href="about-us.html">About Us</a>
       <a href="services.html">Services</a>
       <a href="articles.html">Articles</a>
-      <a href="login.html">Client login</a>
-      <a href="about.html">Contact</a>
+      <a href="https://hasithw.github.io/Invoice-Follow-Up/">Client login</a>
     </nav>
   </div>
 </header>
@@ -494,22 +496,21 @@
           <li><a href="business-central.html">Business Central</a></li>
           <li><a href="zoho-books.html">Zoho Books</a></li>
           <li><a href="odoo.html">Odoo</a></li>
-          <li><a href="web-development.html">Web development</a></li>
           <li><a href="bookkeeping.html">Book keeping</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
         <ul>
-          <li><a href="about.html">About</a></li>
-          <li><a href="about.html#contact">Contact</a></li>
+          <li><a href="about-us.html">About</a></li>
+          <li><a href="contact.html#contact">Contact</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Resources</h4>
         <ul>
           <li><a href="articles.html">Articles</a></li>
-          <li><a href="login.html">Client login</a></li>
+          <li><a href="https://hasithw.github.io/Invoice-Follow-Up/">Client login</a></li>
         </ul>
       </div>
     </div>
